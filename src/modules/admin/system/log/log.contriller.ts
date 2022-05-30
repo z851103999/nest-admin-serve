@@ -10,7 +10,7 @@ import { Controller, Get, Query } from '@nestjs/common';
 import { LoginLogInfo } from './log.class';
 import { PageOptionsDto } from '../../../../common/dto/page.dto';
 import { PageResult } from '../../../../common/class/res.class';
-import { LogDisabled } from '../core/decorators/log-disabled.decorator';
+import { LogDisabled } from '../../core/decorators/log-disabled.decorator';
 
 @ApiSecurity(ADMIN_PREFIX)
 @ApiTags()

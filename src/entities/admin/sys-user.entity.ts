@@ -2,6 +2,7 @@ import { PrimaryGeneratedColumn, Column, Entity } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { BaseEntity } from '../base.entity';
 
+@Entity({ name: 'sys_user' })
 export default class SysUser extends BaseEntity {
   @PrimaryGeneratedColumn()
   @ApiProperty()

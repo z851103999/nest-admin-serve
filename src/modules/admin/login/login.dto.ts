@@ -50,4 +50,3 @@ export class LoginInfoDto {
   @MaxLength(4)
   verifyCode: string;
 }
-

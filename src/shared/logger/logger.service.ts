@@ -17,7 +17,7 @@ import { getAppRootPath } from './utils/app-root-path.util';
 import { createLogger, Logger as WinstonLogger, format } from 'winston';
 import { join } from 'path';
 import * as WinstonDailyRotateFile from 'winston-daily-rotate-file';
-import { isDev } from 'src/config/env';
+import { isDev } from 'src/config';
 import { isPlainObject } from 'lodash';
 
 /**

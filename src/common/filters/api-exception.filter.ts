@@ -6,7 +6,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { FastifyReply } from 'fastify';
-import { isDev } from 'src/config/env';
+import { isDev } from 'src/config';
 import { ApiException } from '../exceptions/api.exception';
 import { ResOp } from '../class/res.class';
 import { LoggerService } from 'src/shared/logger/logger.service';

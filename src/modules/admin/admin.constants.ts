@@ -10,3 +10,5 @@ export const PERMISSION_OPTIONAL_KEY_METADATA =
 export const LOG_DISABLED_KEY_METADATA = 'admin_module:log_disabled';
 /** 根角色数据 **/
 export const ROOT_ROLE_ID = 'admin_module:root_role_id';
+// 禁止在菜单 ID 索引上显示
+export const FORBIDDEN_OP_MENU_ID_INDEX = 79;

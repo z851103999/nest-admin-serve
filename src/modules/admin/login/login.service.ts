@@ -5,7 +5,7 @@ import { isEmpty } from 'lodash';
 import { ImageCaptcha } from './login.class';
 import { ImageCaptchaDto } from './login.dto';
 import { JwtService } from '@nestjs/jwt';
-import { RedisService } from '../../../shared/services/redis.service';
+import { RedisService } from 'cache-manager-ioredis';
 
 @Injectable()
 export class LoginService {
