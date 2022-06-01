@@ -7,7 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import SysMenu from '../../../../entities/admin/sys-menu.entity';
 import { IsNull, Not, Repository } from 'typeorm';
 import { CACHE_MANAGER, Inject } from '@nestjs/common';
-import { AdminWSService } from '../../../ ws/admin-ws.service';
+import { AdminWSService } from 'src/modules/ws/admin-ws.service';
 import { CreateMenuDto } from './menu.dto';
 import { Cache } from 'cache-manager';
 

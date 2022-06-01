@@ -1,4 +1,4 @@
-import { WSModule } from './modules/ ws/ws.module';
+import { WSModule } from './modules/ws/ws.module';
 import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
 import { Module, CacheModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -13,6 +13,7 @@ import configuration from './config/index';
 import { redisStore, RedisModuleOptions } from 'cache-manager-ioredis';
 import { HttpModule } from '@nestjs/axios';
 import { AdminModule } from './modules/admin/admin.module';
+import { TypeORMLoggerService } from './shared/logger/typeorm-logger.service';
 
 @Module({
   imports: [
@@ -26,12 +27,19 @@ import { AdminModule } from './modules/admin/admin.module';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => {
+      useFactory: (
+        config: ConfigService,
+        // loggerOptions: LoggerModuleOptions,
+      ) => {
         return {
           type: 'mysql',
           entities: [__dirname + '/**/*.entity{.ts,.js}'],
           keepConnectionAlive: true,
           ...config.get('db.mysql'),
+          // logger: new TypeORMLoggerService(
+          //   ConfigService.get('db.logging'),
+          //   loggerOptions,
+          // ),
         } as TypeOrmModuleOptions;
       },
     }),

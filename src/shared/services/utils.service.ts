@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { Request } from 'express';
 import * as CryptoJS from 'crypto-js';
 import { customAlphabet, nanoid } from 'nanoid';
+import { FastifyRequest } from 'fastify';
 
 @Injectable()
 export class UtilService {
@@ -9,7 +9,7 @@ export class UtilService {
    * 获取请求IP
    * @param req
    */
-  getReqIP(req: Request): string {
+  getReqIP(req: FastifyRequest): string {
     return (
       // 判断是否有反向代理 IP
       (
