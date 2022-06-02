@@ -1,4 +1,3 @@
-import { ConfigService } from '@nestjs/config';
 import { LoggerService } from './shared/logger/logger.service';
 import { NestFactory, Reflector } from '@nestjs/core';
 import {
@@ -16,6 +15,9 @@ import {
 } from '@nestjs/common';
 import { ApiExceptionFilter } from './common/filters/api-exception.filter';
 import { ApiTransformInterceptor } from './common/interceptors/api-transform.interceptor';
+import { setupSwagger } from './shared/swagger/setup-swagger';
+
+const PORT = process.env.PORT;
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -52,18 +54,17 @@ async function bootstrap() {
   app.useGlobalFilters(new ApiExceptionFilter(app.get(LoggerService)));
   // 全局拦截器
   app.useGlobalInterceptors(new ApiTransformInterceptor(new Reflector()));
-
-  const config = app.get(ConfigService);
-
-  const PORT = config.get<number>(`app.port`) || 8080;
-  const WS_PORT = config.get<number>(`app.port`) || 8081;
-  const WS_PATH = config.get<string>(`app.path`) || `/ws-api`;
-  const DOCS_PREFIX = config.get<string>(`app.prefix`) || `swagger-api`;
+  // swagger
+  setupSwagger(app);
 
   await app.listen(PORT, '0.0.0.0', () => {
     Logger.log(`api服务已经启动,请访问:http://localhost:${PORT}`);
-    Logger.log(`ws服务已经启动,请访问:http://localhost:${WS_PORT}${WS_PATH}`);
-    Logger.log(`API文档已生成,请访问:http://localhost:${PORT}/${DOCS_PREFIX}/`);
+    Logger.log(
+      `ws服务已经启动,请访问:http://localhost:${process.env.WS_PORT}${process.env.WS_PATH}`,
+    );
+    Logger.log(
+      `API文档已生成,请访问:http://localhost:${PORT}/${process.env.DOCS_PREFIX}/`,
+    );
   });
 }
 bootstrap();

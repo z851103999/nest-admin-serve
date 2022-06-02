@@ -17,7 +17,7 @@ import { getAppRootPath } from './utils/app-root-path.util';
 import { createLogger, Logger as WinstonLogger, format } from 'winston';
 import { join } from 'path';
 import * as WinstonDailyRotateFile from 'winston-daily-rotate-file';
-import { isDev } from 'src/config';
+import { isDev } from 'src/config/env';
 import { isPlainObject } from 'lodash';
 
 /**
@@ -417,7 +417,7 @@ export class LoggerService implements NestLoggerService {
    * @param level
    * @returns
    */
-  private getColorByLogLevel(level: WinstonLogLevel): (text: string) => string {
+  static getColorByLogLevel(level: WinstonLogLevel): (text: string) => string {
     switch (level) {
       case 'debug':
         return clc.magentaBright;

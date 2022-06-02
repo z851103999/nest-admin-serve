@@ -1,71 +1,50 @@
 import { WSModule } from './modules/ws/ws.module';
-import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
-import { Module, CacheModule } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { LOGGER_MODULE_OPTIONS } from './shared/logger/logger.constants';
 import {
   LoggerModuleOptions,
   WinstonLogLevel,
 } from './shared/logger/logger.interface';
 import { LoggerModule } from './shared/logger/logger.module';
-import configuration from './config/index';
-import { redisStore, RedisModuleOptions } from 'cache-manager-ioredis';
-import { HttpModule } from '@nestjs/axios';
+import Configuration from './config/configuration';
 import { AdminModule } from './modules/admin/admin.module';
 import { TypeORMLoggerService } from './shared/logger/typeorm-logger.service';
+import { SharedModule } from './shared/shared.module';
 
 @Module({
   imports: [
     // config
     ConfigModule.forRoot({
-      cache: true,
-      load: [configuration],
       isGlobal: true,
+      load: [Configuration],
     }),
     // mysql
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
+      imports: [ConfigModule, LoggerModule],
       useFactory: (
-        config: ConfigService,
-        // loggerOptions: LoggerModuleOptions,
-      ) => {
-        return {
-          type: 'mysql',
-          entities: [__dirname + '/**/*.entity{.ts,.js}'],
-          keepConnectionAlive: true,
-          ...config.get('db.mysql'),
-          // logger: new TypeORMLoggerService(
-          //   ConfigService.get('db.logging'),
-          //   loggerOptions,
-          // ),
-        } as TypeOrmModuleOptions;
-      },
-    }),
-    //cache redis
-    CacheModule.registerAsync({
-      imports: [ConfigModule],
-      useFactory: async (config: ConfigService) => ({
-        store: redisStore,
-        ...config.get<RedisModuleOptions>('redis'),
+        configService: ConfigService,
+        loggerOptions: LoggerModuleOptions,
+      ) => ({
+        autoLoadEntities: true,
+        type: configService.get<any>('database.type'),
+        host: configService.get<string>('database.host'),
+        port: configService.get<number>('database.port'),
+        username: configService.get<string>('database.username'),
+        password: configService.get<string>('database.password'),
+        database: configService.get<string>('database.database'),
+        synchronize: configService.get<boolean>('database.synchronize'),
+        logging: configService.get('database.logging'),
+        timezone: configService.get('database.timezone'), // 时区
+        // 自定义日志
+        logger: new TypeORMLoggerService(
+          configService.get('database.logging'),
+          loggerOptions,
+        ),
       }),
-      inject: [ConfigService],
+      inject: [ConfigService, LOGGER_MODULE_OPTIONS],
     }),
-    // jwt
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      useFactory: async (config: ConfigService) => ({
-        ...config.get<JwtModuleOptions>('jwt'),
-      }),
-      inject: [ConfigService],
-    }),
-    // http
-    HttpModule.register({
-      timeout: 5000,
-      maxRedirects: 5,
-    }),
-    // 参考仓库 https://github.com/buqiyuan/nest-admin
     LoggerModule.forRootAsync(
       {
         imports: [ConfigModule],
@@ -88,8 +67,10 @@ import { TypeORMLoggerService } from './shared/logger/typeorm-logger.service';
         },
         inject: [ConfigService],
       },
+      // global module
       true,
     ),
+    SharedModule,
     AdminModule,
     WSModule,
   ],

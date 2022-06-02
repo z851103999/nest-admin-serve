@@ -20,6 +20,6 @@ export class RoleInfo {
   depts: SysRoleDepartment[];
 }
 
-export class CreatedRoleId {
+export class CreateRoleId {
   roleId: number;
 }

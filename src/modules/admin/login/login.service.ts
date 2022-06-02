@@ -1,17 +1,15 @@
 import { ApiException } from 'src/common/exceptions/api.exception';
-import { SysLogService } from './../system/log/log.service';
-import { SysUserService } from './../system/user/user.service';
-import { UtilService } from './../../../shared/services/utils.service';
+import { SysLogService } from '../system/log/log.service';
+import { SysUserService } from '../system/user/user.service';
+import { UtilService } from '../../../shared/services/utils.service';
 import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
 import svgCaptcha from 'svg-captcha';
 import { isEmpty } from 'lodash';
-import { ImageCaptcha, PermMenuInfo } from './login.class';
+import { ImageCaptcha } from './login.class';
 import { ImageCaptchaDto } from './login.dto';
 import { JwtService } from '@nestjs/jwt';
 import { Cache } from 'cache-manager';
 import { SysMenuService } from '../system/menu/menu.service';
-import SysMenu from 'src/entities/admin/sys-menu.entity';
-import { Any } from 'typeorm';
 
 @Injectable()
 export class LoginService {
@@ -137,6 +135,10 @@ export class LoginService {
     const menus = await this.menuService.getMenus(uid);
     const perms = await this.menuService.getPerms(uid);
     return { menus, perms };
+  }
+
+  async getRedisPasswordVersionById(id: number): Promise<string> {
+    return this.cacheManager.get(`admin:passwordVersion:${id}`);
   }
 
   /**

@@ -8,7 +8,7 @@ import { Connection, In, Not, Repository } from 'typeorm';
 import { CreateRoleId, RoleInfo } from './role.class';
 import { difference, filter, includes, isEmpty, map } from 'lodash';
 import SysRoleDepartment from 'src/entities/admin/sys-role-department.entity';
-import { AdminWSService } from '../../../ ws/admin-ws.service';
+import { AdminWSService } from 'src/modules/ws/admin-ws.service';
 import SysUserRole from '../../../../entities/admin/sys-user-role.entity';
 
 @Injectable()

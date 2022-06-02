@@ -16,11 +16,11 @@ import { UpdatePasswordDto } from '../system/user/user.dto';
 import { SysUserService } from '../system/user/user.service';
 import { UpdatePersonInfoDto } from './account.dto';
 import { FastifyRequest } from 'fastify';
-import { UtilService } from 'src/shared/services/util.service';
+import { UtilService } from 'src/shared/services/utils.service';
 
 @ApiTags('账户模块')
 @ApiSecurity(ADMIN_PREFIX)
-@Controller() 
+@Controller()
 export class AccountController {
   constructor(
     private userService: SysUserService,
