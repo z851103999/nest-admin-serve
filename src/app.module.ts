@@ -1,26 +1,24 @@
-import { WSModule } from './modules/ws/ws.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { LOGGER_MODULE_OPTIONS } from './shared/logger/logger.constants';
+import Configuration from './config/configuration';
+import { AdminModule } from './modules/admin/admin.module';
+import { SharedModule } from './shared/shared.module';
+import { WSModule } from './modules/ws/ws.module';
+import { LoggerModule } from './shared/logger/logger.module';
 import {
   LoggerModuleOptions,
   WinstonLogLevel,
 } from './shared/logger/logger.interface';
-import { LoggerModule } from './shared/logger/logger.module';
-import Configuration from './config/configuration';
-import { AdminModule } from './modules/admin/admin.module';
 import { TypeORMLoggerService } from './shared/logger/typeorm-logger.service';
-import { SharedModule } from './shared/shared.module';
+import { LOGGER_MODULE_OPTIONS } from './shared/logger/logger.constants';
 
 @Module({
   imports: [
-    // config
     ConfigModule.forRoot({
       isGlobal: true,
       load: [Configuration],
     }),
-    // mysql
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule, LoggerModule],
       useFactory: (
@@ -28,7 +26,7 @@ import { SharedModule } from './shared/shared.module';
         loggerOptions: LoggerModuleOptions,
       ) => ({
         autoLoadEntities: true,
-        type: configService.get<any>('database.type'),
+        type: 'mysql',
         host: configService.get<string>('database.host'),
         port: configService.get<number>('database.port'),
         username: configService.get<string>('database.username'),
@@ -45,6 +43,7 @@ import { SharedModule } from './shared/shared.module';
       }),
       inject: [ConfigService, LOGGER_MODULE_OPTIONS],
     }),
+    // custom logger
     LoggerModule.forRootAsync(
       {
         imports: [ConfigModule],
@@ -70,8 +69,12 @@ import { SharedModule } from './shared/shared.module';
       // global module
       true,
     ),
+    // custom module
     SharedModule,
+    // mission module
+    // application modules import
     AdminModule,
+    // websocket module
     WSModule,
   ],
 })

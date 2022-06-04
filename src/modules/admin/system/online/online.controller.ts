@@ -15,7 +15,7 @@ import { KickDto } from './online.dto';
 import { ApiException } from '../../../../common/exceptions/api.exception';
 
 @ApiSecurity(ADMIN_PREFIX)
-@ApiTags('online')
+@ApiTags('在线用户模块')
 @Controller('online')
 export class SysOnlineController {
   constructor(private onlineService: SysOnlineService) {}

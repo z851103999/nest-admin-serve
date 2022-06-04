@@ -70,13 +70,20 @@ export class SysOnlineService {
     const result = await this.entityManager.query(
       `
       SELECT sys_login_log.created_at, sys_login_log.ip, sys_login_log.ua, sys_user.id, sys_user.username, sys_user.name
-        FROM sys_login_log 
-        INNER JOIN sys_user ON sys_login_log.user_id = sys_user.id 
+        FROM sys_login_log
+        INNER JOIN sys_user ON sys_login_log.user_id = sys_user.id
         WHERE sys_login_log.created_at IN (SELECT MAX(created_at) as createdAt FROM sys_login_log GROUP BY user_id)
           AND sys_user.id IN (?)
       `,
       [ids],
     );
+    // const result = await this.entityManager
+    //   .createQueryBuilder('login_user')
+    //   .innerJoinAndSelect('sys_user', 'sys_login_log.user_id = sys_user.id')
+    //   .where('sys_login_log.create_at IN select(max(created_at))')
+    //   .orderBy('user_id', 'DESC')
+    //   .getMany();
+
     if (result) {
       const parser = new UAParser();
       return result.map((e) => {

@@ -417,7 +417,7 @@ export class LoggerService implements NestLoggerService {
    * @param level
    * @returns
    */
-  static getColorByLogLevel(level: WinstonLogLevel): (text: string) => string {
+  private getColorByLogLevel(level: WinstonLogLevel): (text: string) => string {
     switch (level) {
       case 'debug':
         return clc.magentaBright;

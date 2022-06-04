@@ -13,7 +13,7 @@ import { PageResult } from '../../../../common/class/res.class';
 import { LogDisabled } from '../../core/decorators/log-disabled.decorator';
 
 @ApiSecurity(ADMIN_PREFIX)
-@ApiTags()
+@ApiTags('日志模块')
 @Controller('log')
 export class SysLogController {
   constructor(private logService: SysLogService) {}
