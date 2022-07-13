@@ -42,7 +42,7 @@ export class LoginController {
     @Body() dto: LoginInfoDto,
     @Req() req: FastifyRequest,
     @Headers('user-agent') ua: string,
-  ): Promise<LoginToken> {
+  ): Promise<string | object> {
     await this.loginService.checkImgCaptcha(dto.captchaId, dto.verifyCode);
     const token = await this.loginService.getLoginSign(
       dto.username,

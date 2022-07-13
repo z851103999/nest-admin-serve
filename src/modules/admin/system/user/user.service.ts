@@ -1,5 +1,6 @@
+import { RedisService } from './../../../../shared/services/redis.service';
 import { ROOT_ROLE_ID } from 'src/modules/admin/admin.constants';
-import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import SysUser from '../../../../entities/admin/sys-user.entity';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Repository, EntityManager, In, Not } from 'typeorm';
@@ -30,14 +31,13 @@ export class SysUserService {
     private departmentRepository: Repository<SysDepartments>,
     @InjectRepository(SysUserRole)
     private userRoleRepository: Repository<SysUserRole>,
-    @Inject(CACHE_MANAGER)
-    private cacheManager: Cache,
     @InjectEntityManager()
     private entityManager: EntityManager,
     private paramConfigService: SysParamConfigService,
     @Inject(ROOT_ROLE_ID)
     private rootRoleId: number,
     private util: UtilService,
+    private redisService: RedisService,
   ) {}
 
   /**
@@ -332,9 +332,9 @@ export class SysUserService {
    * 禁用用户
    */
   async forbidden(uid: number): Promise<void> {
-    await this.cacheManager.del(`admin:passwordVersion:${uid}`);
-    await this.cacheManager.del(`admin:token:${uid}`);
-    await this.cacheManager.del(`admin:perms:${uid}`);
+    await this.redisService.getRedis().del(`admin:passwordVersion:${uid}`);
+    await this.redisService.getRedis().del(`admin:token:${uid}`);
+    await this.redisService.getRedis().del(`admin:perms:${uid}`);
   }
 
   /**
@@ -350,9 +350,9 @@ export class SysUserService {
         ts.push(`admin:token:${e}`);
         ps.push(`admin:perms:${e}`);
       });
-      await this.cacheManager.store.del(pvs);
-      await this.cacheManager.store.del(ts);
-      await this.cacheManager.store.del(ps);
+      await this.redisService.getRedis().del(pvs);
+      await this.redisService.getRedis().del(ts);
+      await this.redisService.getRedis().del(ps);
     }
   }
 
@@ -361,14 +361,13 @@ export class SysUserService {
    * @param id
    */
   async upgradePasswordV(id: number): Promise<void> {
-    const v: string = await this.cacheManager.get(
-      `admin:passwordVersion:${id}`,
-    );
+    const v: string = await this.redisService
+      .getRedis()
+      .get(`admin:passwordVersion:${id}`);
     if (!isEmpty(v)) {
-      await this.cacheManager.set(
-        `admin:passwordVersion:${id}`,
-        parseInt(v) + 1,
-      );
+      await this.redisService
+        .getRedis()
+        .set(`admin:passwordVersion:${id}`, parseInt(v) + 1);
     }
   }
 }
