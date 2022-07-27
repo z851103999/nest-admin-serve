@@ -17,6 +17,8 @@ import { ApiExceptionFilter } from './common/filters/api-exception.filter';
 import { ApiTransformInterceptor } from './common/interceptors/api-transform.interceptor';
 import { setupSwagger } from './shared/swagger/setup-swagger';
 
+declare const module: any;
+
 const PORT = process.env.PORT;
 
 async function bootstrap() {
@@ -56,6 +58,11 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ApiTransformInterceptor(new Reflector()));
   // swagger
   setupSwagger(app);
+  // 添加热更新
+  if (module.hot) {
+    module.hot.accept();
+    module.hot.dispose(() => app.close());
+  }
 
   await app.listen(PORT, '0.0.0.0', () => {
     Logger.log(`api服务已经启动,请访问:http://localhost:${PORT}`);

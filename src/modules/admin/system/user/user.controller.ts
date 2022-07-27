@@ -14,7 +14,6 @@ import { ADMIN_PREFIX } from './../../admin.constants';
 import {
   ApiOkResponse,
   ApiOperation,
-  ApiResponse,
   ApiSecurity,
   ApiTags,
 } from '@nestjs/swagger';

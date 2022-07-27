@@ -1,4 +1,3 @@
-import { RedisService } from 'src/shared/services/redis.service';
 import { MenuItemAndParentInfoResult } from './menu.class';
 import { ApiException } from './../../../../common/exceptions/api.exception';
 import { includes, isEmpty, concat, uniq } from 'lodash';
@@ -7,9 +6,10 @@ import { ROOT_ROLE_ID } from 'src/modules/admin/admin.constants';
 import { InjectRepository } from '@nestjs/typeorm';
 import SysMenu from '../../../../entities/admin/sys-menu.entity';
 import { IsNull, Not, Repository } from 'typeorm';
-import { Inject } from '@nestjs/common';
+import { CACHE_MANAGER, Inject } from '@nestjs/common';
 import { AdminWSService } from 'src/modules/ws/admin-ws.service';
 import { CreateMenuDto } from './menu.dto';
+import { Cache } from 'cache-manager';
 
 export class SysMenuService {
   constructor(
@@ -19,7 +19,8 @@ export class SysMenuService {
     @Inject(ROOT_ROLE_ID)
     private rootRoleId: number,
     private roleService: SysRoleService,
-    private redisService: RedisService,
+    @Inject(CACHE_MANAGER)
+    private cacheManager: Cache,
   ) {}
 
   /**
@@ -83,7 +84,7 @@ export class SysMenuService {
     }
     // 判断一级菜单路由是否重复
     if (Object.is(dto.parentId, -1) && Object.is(dto.type, 0)) {
-      const rootMenus = await this.menuRepository.find({
+      const rootMenus = await this.menuRepository.findBy({
         parentId: null,
         id: Not(dto.menuId),
       });
@@ -102,7 +103,7 @@ export class SysMenuService {
    */
   async findChildMenus(mid: number): Promise<any> {
     const allMenus: any = [];
-    const menus = await this.menuRepository.find({ parentId: mid });
+    const menus = await this.menuRepository.findBy({ parentId: mid });
     for (let i = 0; i < menus.length; i++) {
       if (menus[i].type !== 2) {
         // 子目录下是菜单或目录，继续往下级查找
@@ -120,7 +121,7 @@ export class SysMenuService {
    * @returns
    */
   async getMenuItemInfo(mid: number): Promise<SysMenu> {
-    return await this.menuRepository.findOne({ id: mid });
+    return await this.menuRepository.findOneBy({ id: mid });
   }
   /**
    * 获取某个菜单以及关联的父菜单的信息
@@ -130,10 +131,10 @@ export class SysMenuService {
   async getMenuItemAndParentInfo(
     mid: number,
   ): Promise<MenuItemAndParentInfoResult> {
-    const menu = await this.menuRepository.findOne({ id: mid });
-    let parentMenu: SysMenu | undefined = undefined;
+    const menu = await this.menuRepository.findOneBy({ id: mid });
+    let parentMenu;
     if (menu && menu.parentId) {
-      parentMenu = await this.menuRepository.findOne({ id: menu.parentId });
+      parentMenu = await this.menuRepository.findBy({ id: menu.parentId });
     }
     return { menu, parentMenu };
   }
@@ -143,7 +144,7 @@ export class SysMenuService {
    * @returns
    */
   async findRouterExist(router: string): Promise<boolean> {
-    const menus = await this.menuRepository.findOne({ router });
+    const menus = await this.menuRepository.findOneBy({ router });
     return !isEmpty(menus);
   }
 
@@ -157,7 +158,7 @@ export class SysMenuService {
     let perms: any[] = [];
     let result: any = null;
     if (includes(roleIds, this.rootRoleId)) {
-      result = await this.menuRepository.find({
+      result = await this.menuRepository.findBy({
         perms: Not(IsNull()),
         type: 2,
       });
@@ -194,27 +195,26 @@ export class SysMenuService {
    */
   async refreshPerms(uid: number): Promise<void> {
     const perms = await this.getPerms(uid);
-    const online = await this.redisService.getRedis().get(`admin:token:${uid}`);
+    const online = await this.cacheManager.get(`admin:token:${uid}`);
     if (online) {
-      await this.redisService
-        .getRedis()
-        .set(`admin:perms:${uid}`, JSON.stringify(perms));
+      await this.cacheManager.set(`admin:perms:${uid}`, JSON.stringify(perms));
     }
   }
   /**
    * 刷新所有在线用户的权限
    */
   async refreshOnlineUserPerms(): Promise<void> {
-    const onlineUserIds: string[] = await this.redisService
-      .getRedis()
-      .keys('admin:token:*');
+    const onlineUserIds: string[] = await this.cacheManager.store.keys(
+      'admin:token:*',
+    );
     if (onlineUserIds && onlineUserIds.length > 0) {
       for (let i = 0; i < onlineUserIds.length; i++) {
         const uid = onlineUserIds[i].split('admin:token:')[i];
         const perms = await this.getPerms(parseInt(uid));
-        await this.redisService
-          .getRedis()
-          .set(`admin:perms:${uid}`, JSON.stringify(perms));
+        await this.cacheManager.set(
+          `admin:perms:${uid}`,
+          JSON.stringify(perms),
+        );
       }
     }
   }

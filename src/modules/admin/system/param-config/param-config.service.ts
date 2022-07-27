@@ -66,23 +66,23 @@ export class SysParamConfigService {
    * @returns
    */
   async findOne(id: number): Promise<SysConfig> {
-    return await this.configRepository.findOne({ id });
+    return await this.configRepository.findOneBy({ id });
   }
 
   async isExistKey(key: string): Promise<void | never> {
-    const result = await this.configRepository.findOne({ key });
+    const result = await this.configRepository.findBy({ key });
     if (result) {
       throw new ApiException(10021);
     }
   }
 
   async findValueByKey(key: string): Promise<string | null> {
-    const result = await this.configRepository.findOne(
-      { key },
-      { select: ['value'] },
-    );
+    const result = await this.configRepository.find({
+      where: { key },
+      select: ['value'],
+    });
     if (result) {
-      return result.value;
+      return result['value'];
     }
     return null;
   }

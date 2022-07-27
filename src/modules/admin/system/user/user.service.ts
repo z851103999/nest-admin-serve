@@ -1,6 +1,5 @@
-import { RedisService } from './../../../../shared/services/redis.service';
 import { ROOT_ROLE_ID } from 'src/modules/admin/admin.constants';
-import { Inject, Injectable } from '@nestjs/common';
+import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
 import SysUser from '../../../../entities/admin/sys-user.entity';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Repository, EntityManager, In, Not } from 'typeorm';
@@ -37,7 +36,8 @@ export class SysUserService {
     @Inject(ROOT_ROLE_ID)
     private rootRoleId: number,
     private util: UtilService,
-    private redisService: RedisService,
+    @Inject(CACHE_MANAGER)
+    private cacheManager: Cache,
   ) {}
 
   /**
@@ -45,7 +45,7 @@ export class SysUserService {
    * @param username
    */
   async findUserByUserName(username: string): Promise<SysUser | undefined> {
-    return await this.userRepository.findOne({
+    return await this.userRepository.findOneBy({
       username: username,
       status: 1,
     });
@@ -57,7 +57,7 @@ export class SysUserService {
    * @param ip
    */
   async getAccountInfo(uid: number, ip?: string): Promise<AccountInfo> {
-    const user: SysUser = await this.userRepository.findOne({ id: uid });
+    const user: SysUser = await this.userRepository.findOneBy({ id: uid });
     if (isEmpty(user)) {
       throw new ApiException(10017);
     }
@@ -87,7 +87,7 @@ export class SysUserService {
    * @param dto
    */
   async updatePassword(uid: number, dto: UpdatePasswordDto): Promise<void> {
-    const user = await this.userRepository.findOne({ id: uid });
+    const user = await this.userRepository.findOneBy({ id: uid });
     if (isEmpty(user)) {
       throw new ApiException(10017);
     }
@@ -107,7 +107,7 @@ export class SysUserService {
    * @param password
    */
   async forceUpdatePassword(uid: number, password: string): Promise<void> {
-    const user = await this.userRepository.findOne({ id: uid });
+    const user = await this.userRepository.findOneBy({ id: uid });
     if (isEmpty(user)) {
       throw new ApiException(10017);
     }
@@ -121,7 +121,7 @@ export class SysUserService {
    */
   async add(param: CreateUserDto): Promise<void> {
     // const insertData: any = { ...CreateUserDto };
-    const exists = await this.userRepository.findOne({
+    const exists = await this.userRepository.findOneBy({
       username: param.username,
     });
     if (!isEmpty(exists)) {
@@ -201,17 +201,17 @@ export class SysUserService {
   async info(
     id: number,
   ): Promise<SysUser & { roles: number[]; departmentName: string }> {
-    const user: any = await this.userRepository.findOne(id);
+    const user = await this.userRepository.findOneBy({ id });
     if (isEmpty(user)) {
       throw new ApiException(10017);
     }
-    const departmentRow = await this.departmentRepository.findOne({
+    const departmentRow = await this.departmentRepository.findOneBy({
       id: user.departmentId,
     });
     if (isEmpty(departmentRow)) {
       throw new ApiException(10018);
     }
-    const roleRows = await this.userRoleRepository.find({ userId: user.id });
+    const roleRows = await this.userRoleRepository.findBy({ userId: user.id });
     const roles = roleRows.map((e) => {
       return e.roleId;
     });
@@ -246,11 +246,11 @@ export class SysUserService {
     const queryAll: boolean = isEmpty(deptIds);
     const rootUserId = await this.findRootUserId();
     if (queryAll) {
-      return await this.userRepository.count({
+      return await this.userRepository.countBy({
         id: Not(In([rootUserId, uid])),
       });
     }
-    return await this.userRepository.count({
+    return await this.userRepository.countBy({
       id: Not(In([rootUserId, uid])),
       departmentId: In(deptIds),
     });
@@ -260,7 +260,7 @@ export class SysUserService {
    * 查找超管的用户ID
    */
   async findRootUserId(): Promise<number> {
-    const result = await this.userRoleRepository.findOne({
+    const result = await this.userRoleRepository.findOneBy({
       id: this.rootRoleId,
     });
     return result.userId;
@@ -332,9 +332,9 @@ export class SysUserService {
    * 禁用用户
    */
   async forbidden(uid: number): Promise<void> {
-    await this.redisService.getRedis().del(`admin:passwordVersion:${uid}`);
-    await this.redisService.getRedis().del(`admin:token:${uid}`);
-    await this.redisService.getRedis().del(`admin:perms:${uid}`);
+    await this.cacheManager.del(`admin:passwordVersion:${uid}`);
+    await this.cacheManager.del(`admin:token:${uid}`);
+    await this.cacheManager.del(`admin:perms:${uid}`);
   }
 
   /**
@@ -350,9 +350,10 @@ export class SysUserService {
         ts.push(`admin:token:${e}`);
         ps.push(`admin:perms:${e}`);
       });
-      await this.redisService.getRedis().del(pvs);
-      await this.redisService.getRedis().del(ts);
-      await this.redisService.getRedis().del(ps);
+      // await this.cacheManager.del(pvs);
+      await this.cacheManager.store.del(pvs);
+      await this.cacheManager.store.del(ts);
+      await this.cacheManager.store.del(ps);
     }
   }
 
@@ -361,13 +362,14 @@ export class SysUserService {
    * @param id
    */
   async upgradePasswordV(id: number): Promise<void> {
-    const v: string = await this.redisService
-      .getRedis()
-      .get(`admin:passwordVersion:${id}`);
+    const v: string = await this.cacheManager.get(
+      `admin:passwordVersion:${id}`,
+    );
     if (!isEmpty(v)) {
-      await this.redisService
-        .getRedis()
-        .set(`admin:passwordVersion:${id}`, parseInt(v) + 1);
+      await this.cacheManager.set(
+        `admin:passwordVersion:${id}`,
+        parseInt(v) + 1,
+      );
     }
   }
 }

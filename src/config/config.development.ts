@@ -9,7 +9,7 @@ export default {
     port: 3306,
     username: 'root',
     password: '12345678',
-    database: 'nest-admin',
+    database: 'nestadmin',
     synchronize: true,
     logging: false,
     timezone: '+08:00', // 东八区
