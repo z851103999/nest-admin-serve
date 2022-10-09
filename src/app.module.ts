@@ -1,7 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import Configuration from './config/configuration';
+import {
+  ConfigurationKeyPaths,
+  getConfiguration,
+} from './config/configuration';
 import { AdminModule } from './modules/admin/admin.module';
 import { SharedModule } from './shared/shared.module';
 import { WSModule } from './modules/ws/ws.module';
@@ -12,17 +15,19 @@ import {
 } from './shared/logger/logger.interface';
 import { TypeORMLoggerService } from './shared/logger/typeorm-logger.service';
 import { LOGGER_MODULE_OPTIONS } from './shared/logger/logger.constants';
+import { Configuration } from 'webpack';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [Configuration],
+      load: [getConfiguration],
+      envFilePath: [`.env.${process.env.NODE_ENV}`, '.env'],
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule, LoggerModule],
       useFactory: (
-        configService: ConfigService,
+        configService: ConfigService<ConfigurationKeyPaths>,
         loggerOptions: LoggerModuleOptions,
       ) => ({
         autoLoadEntities: true,
@@ -71,7 +76,6 @@ import { LOGGER_MODULE_OPTIONS } from './shared/logger/logger.constants';
     ),
     // custom module
     SharedModule,
-    // mission module
     // application modules import
     AdminModule,
     // websocket module

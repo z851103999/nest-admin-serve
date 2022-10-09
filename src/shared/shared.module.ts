@@ -3,7 +3,7 @@ import { CacheModule, Global, Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { UtilService } from './services/utils.service';
 import { HttpModule } from '@nestjs/axios';
-import * as redisStore from 'cache-manager-ioredis';
+import { RedisModule } from './redis/redis.module';
 
 const providers = [UtilService];
 
@@ -24,22 +24,10 @@ const providers = [UtilService];
       inject: [ConfigService],
     }),
     // redis cache
-    // CacheModule.register(),
-    // RedisModule.registerAsync({
-    //   imports: [ConfigModule],
-    //   useFactory: (configService: ConfigService) => ({
-    //     host: configService.get<string>('redis.host'),
-    //     port: configService.get<number>('redis.port'),
-    //     password: configService.get<string>('redis.password'),
-    //     db: configService.get<number>('redis.db'),
-    //   }),
-    //   inject: [ConfigService],
-    // }),
-    CacheModule.registerAsync({
+    CacheModule.register(),
+    RedisModule.registerAsync({
       imports: [ConfigModule],
-      isGlobal: true,
       useFactory: (configService: ConfigService) => ({
-        store: redisStore,
         host: configService.get<string>('redis.host'),
         port: configService.get<number>('redis.port'),
         password: configService.get<string>('redis.password'),

@@ -7,7 +7,7 @@ export function setupSwagger(app: INestApplication): void {
   const configService: ConfigService = app.get(ConfigService);
   // 默认启用
   const enable = configService.get<boolean>('swagger.enable', true);
-
+  // 判断是否需要启用
   if (!enable) {
     return;
   }

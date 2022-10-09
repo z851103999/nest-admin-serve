@@ -1,5 +1,5 @@
 /**
- * 检查dev env
+ * 检查开发环境 env
  * @returns
  */
 export function isDev(): boolean {
