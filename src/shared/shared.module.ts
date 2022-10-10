@@ -4,8 +4,9 @@ import { JwtModule } from '@nestjs/jwt';
 import { UtilService } from './services/utils.service';
 import { HttpModule } from '@nestjs/axios';
 import { RedisModule } from './redis/redis.module';
+import { RedisService } from './services/redis.service';
 
-const providers = [UtilService];
+const providers = [UtilService, RedisService];
 
 @Global()
 @Module({

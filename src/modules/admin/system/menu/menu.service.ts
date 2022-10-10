@@ -9,7 +9,7 @@ import { IsNull, Not, Repository } from 'typeorm';
 import { CACHE_MANAGER, Inject } from '@nestjs/common';
 import { AdminWSService } from 'src/modules/ws/admin-ws.service';
 import { CreateMenuDto } from './menu.dto';
-import { Cache } from 'cache-manager';
+import { RedisService } from '@/shared/services/redis.service';
 
 export class SysMenuService {
   constructor(
@@ -20,7 +20,7 @@ export class SysMenuService {
     private rootRoleId: number,
     private roleService: SysRoleService,
     @Inject(CACHE_MANAGER)
-    private cacheManager: Cache,
+    private redisService: RedisService,
   ) {}
 
   /**
@@ -195,26 +195,27 @@ export class SysMenuService {
    */
   async refreshPerms(uid: number): Promise<void> {
     const perms = await this.getPerms(uid);
-    const online = await this.cacheManager.get(`admin:token:${uid}`);
+    const online = await this.redisService.getRedis().get(`admin:token:${uid}`);
     if (online) {
-      await this.cacheManager.set(`admin:perms:${uid}`, JSON.stringify(perms));
+      await this.redisService
+        .getRedis()
+        .set(`admin:perms:${uid}`, JSON.stringify(perms));
     }
   }
   /**
    * 刷新所有在线用户的权限
    */
   async refreshOnlineUserPerms(): Promise<void> {
-    const onlineUserIds: string[] = await this.cacheManager.store.keys(
-      'admin:token:*',
-    );
+    const onlineUserIds: string[] = await this.redisService
+      .getRedis()
+      .keys('admin:token:*');
     if (onlineUserIds && onlineUserIds.length > 0) {
       for (let i = 0; i < onlineUserIds.length; i++) {
         const uid = onlineUserIds[i].split('admin:token:')[i];
         const perms = await this.getPerms(parseInt(uid));
-        await this.cacheManager.set(
-          `admin:perms:${uid}`,
-          JSON.stringify(perms),
-        );
+        await this.redisService
+          .getRedis()
+          .set(`admin:perms:${uid}`, JSON.stringify(perms));
       }
     }
   }

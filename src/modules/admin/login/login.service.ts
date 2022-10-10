@@ -2,14 +2,14 @@ import { ApiException } from 'src/common/exceptions/api.exception';
 import { SysLogService } from '../system/log/log.service';
 import { SysUserService } from '../system/user/user.service';
 import { UtilService } from '../../../shared/services/utils.service';
-import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import * as svgCaptcha from 'svg-captcha';
 import { isEmpty } from 'lodash';
 import { ImageCaptcha } from './login.class';
 import { ImageCaptchaDto } from './login.dto';
 import { JwtService } from '@nestjs/jwt';
 import { SysMenuService } from '../system/menu/menu.service';
-import { Cache } from 'cache-manager';
+import { RedisService } from '@/shared/services/redis.service';
 
 @Injectable()
 export class LoginService {
@@ -19,8 +19,7 @@ export class LoginService {
     private userService: SysUserService,
     private logService: SysLogService,
     private jwtService: JwtService,
-    @Inject(CACHE_MANAGER)
-    private cacheManager: Cache,
+    private redisService: RedisService,
   ) {}
   /**
    * 创建验证码并加入Redis缓存中
@@ -44,11 +43,9 @@ export class LoginService {
       id: this.util.generateUUID(),
     };
     // 5分钟过期时间
-    await this.cacheManager.set(
-      `admin:captcha:img:${result.id}`,
-      svg.text,
-      60 * 5,
-    );
+    await this.redisService
+      .getRedis()
+      .set(`admin:captcha:img:${result.id}`, svg.text, 'EX', 60 * 5);
     return result;
   }
   /**
@@ -57,13 +54,13 @@ export class LoginService {
    * @param code
    */
   async checkImgCaptcha(id: string, code: string): Promise<void> {
-    const result: string = await this.cacheManager.get(
-      `admin:captcha:img:${id}`,
-    );
+    const result: string = await this.redisService
+      .getRedis()
+      .get(`admin:captcha:img:${id}`);
     if (isEmpty(result) || code.toLowerCase() !== result.toLowerCase()) {
       throw new ApiException(10002);
     }
-    await this.cacheManager.del(`admin:captcha:img:${id}`);
+    await this.redisService.getRedis().del(`admin:captcha:img:${id}`);
   }
   /**
    * 获取登录JWT
@@ -104,17 +101,16 @@ export class LoginService {
       //   expiresIn: '24h',
       // },
     );
-    await this.cacheManager.set(`admin:passwordVersion:${user.id}`, 1);
+    await this.redisService
+      .getRedis()
+      .set(`admin:passwordVersion:${user.id}`, 1);
     // Token设置过期时间 24小时
-    await this.cacheManager.set(
-      `admin:token:${user.id}`,
-      jwtSign,
-      60 * 60 * 24,
-    );
-    await this.cacheManager.set(
-      `admin:perms:${user.id}`,
-      JSON.stringify(perms),
-    );
+    await this.redisService
+      .getRedis()
+      .set(`admin:token:${user.id}`, jwtSign, 'EX', 60 * 60 * 24);
+    await this.redisService
+      .getRedis()
+      .set(`admin:perms:${user.id}`, JSON.stringify(perms));
     await this.logService.saveLoginLog(user.id, ip, ua);
     return jwtSign;
   }
@@ -155,7 +151,7 @@ export class LoginService {
   }
 
   async getRedisPasswordVersionById(id: number): Promise<string> {
-    return this.cacheManager.get(`admin:passwordVersion:${id}`);
+    return this.redisService.getRedis().get(`admin:passwordVersion:${id}`);
   }
 
   /**
@@ -163,7 +159,7 @@ export class LoginService {
    * @param id
    */
   async getRedisTokenById(id: number): Promise<string> {
-    return this.cacheManager.get(`admin:token:${id}`);
+    return this.redisService.getRedis().get(`admin:token:${id}`);
   }
 
   /**
@@ -171,6 +167,6 @@ export class LoginService {
    * @param id
    */
   async getRedisPermsById(id: number): Promise<string> {
-    return this.cacheManager.get(`admin:perms:${id}`);
+    return this.redisService.getRedis().get(`admin:perms:${id}`);
   }
 }
