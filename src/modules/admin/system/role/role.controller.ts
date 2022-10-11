@@ -1,26 +1,26 @@
-import { PageResult } from 'src/common/class/res.class';
-import { PageOptionsDto } from 'src/common/dto/page.dto';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import {
   ApiOperation,
+  ApiOkResponse,
   ApiSecurity,
   ApiTags,
-  ApiOkResponse,
 } from '@nestjs/swagger';
-import { ADMIN_PREFIX } from '../../admin.constants';
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
-import { SysRoleService } from './role.service';
-import { SysMenuService } from '../menu/menu.service';
+import { ADMIN_PREFIX } from 'src/modules/admin/admin.constants';
+import { PaginatedResponseDto } from 'src/common/class/res.class';
 import SysRole from 'src/entities/admin/sys-role.entity';
 import { ApiException } from 'src/common/exceptions/api.exception';
-import { IAdminUser } from '../../admin.interface';
 import { AdminUser } from '../../core/decorators/admin-user.decorator';
+import { IAdminUser } from '../../admin.interface';
+import { SysMenuService } from '../menu/menu.service';
 import { RoleInfo } from './role.class';
 import {
-  DeleteRoleDto,
   CreateRoleDto,
-  UpdateRoleDto,
+  DeleteRoleDto,
   InfoRoleDto,
+  PageSearchRoleDto,
+  UpdateRoleDto,
 } from './role.dto';
+import { SysRoleService } from './role.service';
 
 @ApiSecurity(ADMIN_PREFIX)
 @ApiTags('角色模块')
@@ -41,15 +41,16 @@ export class SysRoleController {
   @ApiOperation({ summary: '分页查询角色信息' })
   @ApiOkResponse({ type: [SysRole] })
   @Get('page')
-  async page(@Query() dto: PageOptionsDto): Promise<PageResult<SysRole>> {
-    const list = await this.roleService.page(dto.page - 1, dto.limit);
-    const count = await this.roleService.count();
+  async page(
+    @Query() dto: PageSearchRoleDto,
+  ): Promise<PaginatedResponseDto<SysRole>> {
+    const [list, total] = await this.roleService.page(dto);
     return {
       list,
       pagination: {
         size: dto.limit,
         page: dto.page,
-        total: count,
+        total,
       },
     };
   }

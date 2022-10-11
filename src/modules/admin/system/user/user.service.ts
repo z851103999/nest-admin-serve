@@ -17,7 +17,7 @@ import {
 import { UtilService } from '../../../../shared/services/utils.service';
 import { AccountInfo, PageSearchUserInfo } from './user.class';
 import { SysParamConfigService } from '../param-config/param-config.service';
-import { SYS_USER_INITPASSWORD } from 'src/common/contents/param-config.contents';
+import { SYS_USER_INITPASSWORD } from '@/common/contants/param-config.contents';
 import { findIndex } from 'lodash';
 // import { SysParamConfigService } from '../param-config/param-config.service';
 

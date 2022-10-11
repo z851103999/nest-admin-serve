@@ -1,22 +1,25 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import SysLoginLog from '../../../../entities/admin/sys-login-log.entity';
+import SysLoginLog from 'src/entities/admin/sys-login-log.entity';
+import SysTaskLog from 'src/entities/admin/sys-task-log.entity';
+import SysUser from 'src/entities/admin/sys-user.entity';
+import { In, Repository } from 'typeorm';
 import { UAParser } from 'ua-parser-js';
-import { LoginLogInfo } from './log.class';
+import { LoginLogInfo, TaskLogInfo } from './log.class';
 
 @Injectable()
 export class SysLogService {
   constructor(
     @InjectRepository(SysLoginLog)
     private loginLogRepository: Repository<SysLoginLog>,
+    @InjectRepository(SysTaskLog)
+    private taskLogRepository: Repository<SysTaskLog>,
+    @InjectRepository(SysUser)
+    private userRepository: Repository<SysUser>,
   ) {}
 
   /**
-   * 保存登录日志
-   * @param uid
-   * @param ip
-   * @param ua
+   * 记录登录日志
    */
   async saveLoginLog(uid: number, ip: string, ua: string): Promise<void> {
     await this.loginLogRepository.save({
@@ -27,16 +30,20 @@ export class SysLogService {
   }
 
   /**
-   * 计算登录日志的总数
+   * 计算登录日志日志总数
    */
   async countLoginLog(): Promise<number> {
-    return await this.loginLogRepository.count();
+    const userIds = await this.userRepository
+      .createQueryBuilder('user')
+      .select(['user.id'])
+      .getMany();
+    return await this.loginLogRepository.count({
+      where: { userId: In(userIds.map((n) => n.id)) },
+    });
   }
 
   /**
    * 分页加载日志信息
-   * @param page 页数
-   * @param count 个数
    */
   async pageGetLoginLog(page: number, count: number): Promise<LoginLogInfo[]> {
     const result = await this.loginLogRepository
@@ -52,9 +59,9 @@ export class SysLogService {
       return {
         id: e.login_log_id,
         ip: e.login_log_ip,
-        os: `${u.os.name}${u.os.version}`,
-        browser: `${u.browser.name}${u.browser.version}`,
-        time: e.login_log_create_at,
+        os: `${u.os.name} ${u.os.version}`,
+        browser: `${u.browser.name} ${u.browser.version}`,
+        time: e.login_log_created_at,
         username: e.user_username,
       };
     });
@@ -65,5 +72,61 @@ export class SysLogService {
    */
   async clearLoginLog(): Promise<void> {
     await this.loginLogRepository.clear();
+  }
+  // ----- task
+
+  /**
+   * 记录任务日志
+   */
+  async recordTaskLog(
+    tid: number,
+    status: number,
+    time?: number,
+    err?: string,
+  ): Promise<number> {
+    const result = await this.taskLogRepository.save({
+      taskId: tid,
+      status,
+      detail: err,
+    });
+    return result.id;
+  }
+
+  /**
+   * 计算日志总数
+   */
+  async countTaskLog(): Promise<number> {
+    return await this.taskLogRepository.count();
+  }
+
+  /**
+   * 分页加载日志信息
+   */
+  async page(page: number, count: number): Promise<TaskLogInfo[]> {
+    const result = await this.taskLogRepository
+      .createQueryBuilder('task_log')
+      .leftJoinAndSelect('sys_task', 'task', 'task_log.task_id = task.id')
+      .orderBy('task_log.id', 'DESC')
+      .offset(page * count)
+      .limit(count)
+      .getRawMany();
+    return result.map((e) => {
+      return {
+        id: e.task_log_id,
+        taskId: e.task_id,
+        name: e.task_name,
+        createdAt: e.task_log_created_at,
+        consumeTime: e.task_log_consume_time,
+        detail: e.task_log_detail,
+        status: e.task_log_status,
+      };
+    });
+  }
+
+  /**
+   * 清空表中的所有数据
+   */
+  async clearTaskLog(): Promise<void> {
+    await this.taskLogRepository.clear();
   }
 }

@@ -12,3 +12,8 @@ export const ROOT_ROLE_ID = 'admin_module:root_role_id';
 export const FORBIDDEN_OP_MENU_ID_INDEX = 78;
 
 export const ADMIN_PREFIX = 'admin';
+
+// 系统任务队列名称
+export const SYS_TASK_QUEUE_NAME = 'admin_module:sys-task';
+// 系统任务队列前缀
+export const SYS_TASK_QUEUE_PREFIX = 'admin:sys:task';

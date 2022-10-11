@@ -19,7 +19,7 @@ import { LoginService } from '../../login/login.service';
 export class AuthGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
-    private JwtService: JwtService,
+    private jwtService: JwtService,
     private loginService: LoginService,
   ) {}
 
@@ -42,7 +42,7 @@ export class AuthGuard implements CanActivate {
     }
     try {
       // 挂载对象到当前请求上
-      request[ADMIN_USER] = this.JwtService.verify(token);
+      request[ADMIN_USER] = this.jwtService.verify(token);
     } catch (e) {
       // 无法通过token校验
       throw new ApiException(11001);

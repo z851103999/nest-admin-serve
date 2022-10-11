@@ -1,5 +1,5 @@
 import { WsException } from '@nestjs/websockets';
-import { ErrorCodeMap } from '../contents/error-code.contants';
+import { ErrorCodeMap } from '../contants/error-code.contants';
 
 export class SocketException extends WsException {
   private errorCode: number;

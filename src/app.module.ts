@@ -1,3 +1,4 @@
+import { MissionModule } from './mission/mission.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -15,7 +16,8 @@ import {
 } from './shared/logger/logger.interface';
 import { TypeORMLoggerService } from './shared/logger/typeorm-logger.service';
 import { LOGGER_MODULE_OPTIONS } from './shared/logger/logger.constants';
-import { Configuration } from 'webpack';
+import { BullModule } from '@nestjs/bull';
+import './polyfill';
 
 @Module({
   imports: [
@@ -31,7 +33,7 @@ import { Configuration } from 'webpack';
         loggerOptions: LoggerModuleOptions,
       ) => ({
         autoLoadEntities: true,
-        type: 'mysql',
+        type: configService.get<any>('database.type'),
         host: configService.get<string>('database.host'),
         port: configService.get<number>('database.port'),
         username: configService.get<string>('database.username'),
@@ -48,6 +50,7 @@ import { Configuration } from 'webpack';
       }),
       inject: [ConfigService, LOGGER_MODULE_OPTIONS],
     }),
+    BullModule.forRoot({}),
     // custom logger
     LoggerModule.forRootAsync(
       {
@@ -80,6 +83,8 @@ import { Configuration } from 'webpack';
     AdminModule,
     // websocket module
     WSModule,
+    // mission
+    MissionModule,
   ],
 })
 export class AppModule {}

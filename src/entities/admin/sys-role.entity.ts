@@ -8,7 +8,7 @@ export default class SysRole extends BaseEntity {
   @ApiProperty()
   id: number;
 
-  @Column()
+  @Column({ name: 'user_id' })
   @ApiProperty()
   userId: string;
 
@@ -20,7 +20,7 @@ export default class SysRole extends BaseEntity {
   @ApiProperty()
   label: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, default: '' })
   @ApiProperty()
   remark: string;
 }

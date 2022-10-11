@@ -1,3 +1,5 @@
+import { ApiProperty } from '@nestjs/swagger';
+
 export class ResOp {
   readonly data: any;
   readonly code: number;
@@ -28,5 +30,13 @@ export class Pagination {
  */
 export class PageResult<T> {
   list?: Array<T>;
+  pagination: Pagination;
+}
+/**
+ * 分页相应DTO
+ */
+export class PaginatedResponseDto<T> {
+  list: Array<T>;
+  @ApiProperty()
   pagination: Pagination;
 }

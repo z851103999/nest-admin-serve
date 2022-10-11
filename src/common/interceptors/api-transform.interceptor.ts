@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { FastifyReply } from 'fastify';
 import { map } from 'rxjs/operators';
 import { ResOp } from '../class/res.class';
-import { TRANSFORM_KEEP_KEY_METADATA } from '../contents/decorator.contants';
+import { TRANSFORM_KEEP_KEY_METADATA } from '../contants/decorator.contants';
 
 /**
  * 统一处理返回接口结果，如果不需要则添加@keep装饰器

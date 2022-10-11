@@ -19,6 +19,7 @@ export class SysServeController {
   @ApiOperation({ summary: '获取服务器运行信息' })
   @ApiOkResponse({ type: ServeStatInfo })
   @Get('stat')
+  @PermissionOptional()
   async stat(): Promise<ServeStatInfo> {
     return await this.serveService.getServeStat();
   }

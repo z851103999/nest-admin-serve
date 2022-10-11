@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { exitOnError } from 'winston';
 /**
  * 运行配置
  */

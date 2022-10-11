@@ -1,16 +1,12 @@
-import { CreateDateColumn, UpdateDateColumn, DeleteDateColumn } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
+import { CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 export abstract class BaseEntity {
-  @CreateDateColumn({ name: 'create_at' })
+  @CreateDateColumn({ name: 'created_at' })
   @ApiProperty()
-  createAt: Date;
+  createdAt: Date;
 
-  @UpdateDateColumn({ name: 'update_at' })
+  @UpdateDateColumn({ name: 'updated_at' })
   @ApiProperty()
-  updateAt: Date;
-
-  @DeleteDateColumn({ name: 'delete_at' })
-  @ApiProperty()
-  delete_at: Date;
+  updatedAt: Date;
 }

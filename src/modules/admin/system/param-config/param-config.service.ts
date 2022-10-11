@@ -2,7 +2,7 @@ import { ApiException } from 'src/common/exceptions/api.exception';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import SysConfig from 'src/entities/admin/sys-config.entity';
-import { Repository, UpdateDateColumn } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CreateParamConfigDto, UpdateParamConfigDto } from './param-config.dto';
 
 @Injectable()
@@ -68,14 +68,21 @@ export class SysParamConfigService {
   async findOne(id: number): Promise<SysConfig> {
     return await this.configRepository.findOneBy({ id });
   }
-
+  /**
+   * 参数配置键值对已存在
+   * @param key
+   */
   async isExistKey(key: string): Promise<void | never> {
     const result = await this.configRepository.findBy({ key });
     if (result) {
       throw new ApiException(10021);
     }
   }
-
+  /**
+   * 按键查找值;
+   * @param key
+   * @returns
+   */
   async findValueByKey(key: string): Promise<string | null> {
     const result = await this.configRepository.find({
       where: { key },

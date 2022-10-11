@@ -1,5 +1,5 @@
 import { HttpException } from '@nestjs/common';
-import { ErrorCodeMap } from '../contents/error-code.contants';
+import { ErrorCodeMap } from '../contants/error-code.contants';
 
 /**
  * APi业务列席错误代码，非HTTP CODE
