@@ -35,7 +35,7 @@ export class AuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<FastifyRequest>();
     const url = request.url;
     const path = url.split('?')[0];
-    const token = request.headers['authorization'] as string;
+    const token = request.headers['access_token'] as string;
     if (isEmpty(token)) {
       // 登录无效或无权限访问
       throw new ApiException(11001);
@@ -61,7 +61,7 @@ export class AuthGuard implements CanActivate {
     const redisToken = await this.loginService.getRedisTokenById(
       request[ADMIN_USER].uid,
     );
-    if (token !== redisToken) {
+    if (token !== redisToken.accessToken) {
       // 与redis保存不一致 登录身份已过期
       throw new ApiException(11002);
     }

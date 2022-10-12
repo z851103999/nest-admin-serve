@@ -50,3 +50,9 @@ export class LoginInfoDto {
   @MaxLength(4)
   verifyCode: string;
 }
+
+export class RefreshInfoDto {
+  @ApiProperty({ description: '管理员用户名' })
+  @IsString()
+  refreshToken: string;
+}

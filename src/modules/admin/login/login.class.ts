@@ -18,7 +18,18 @@ export class ImageCaptcha {
  */
 export class LoginToken {
   @ApiProperty({ description: 'JWT身份Token' })
-  token: string;
+  accessToken: string;
+
+  @ApiProperty({ description: 'JWT身份刷新' })
+  refreshToken: string;
+
+  @ApiProperty({ description: '过期时间' })
+  expiration: number;
+}
+
+export class RefreshToken {
+  @ApiProperty({ description: 'JWT身份Token' })
+  accessToken: string;
 }
 
 /**

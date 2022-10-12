@@ -332,8 +332,8 @@ export class SysUserService {
    */
   async forbidden(uid: number): Promise<void> {
     await this.redisService.getRedis().del(`admin:passwordVersion:${uid}`);
-    await this.redisService.getRedis().del(`admin:token:${uid}`);
-    await this.redisService.getRedis().del(`admin:perms:${uid}`);
+    await this.redisService.getRedis().del(`admin:accessToken:${uid}`);
+    await this.redisService.getRedis().del(`admin:refreshToken:${uid}`);
   }
 
   /**
@@ -344,13 +344,16 @@ export class SysUserService {
       const pvs: string[] = [];
       const ts: string[] = [];
       const ps: string[] = [];
+      const rf: string[] = [];
       uids.forEach((e) => {
         pvs.push(`admin:passwordVersion:${e}`);
-        ts.push(`admin:token:${e}`);
+        ts.push(`admin:accessToken:${e}`);
+        rf.push(`admin:refreshToken:${e}`);
         ps.push(`admin:perms:${e}`);
       });
       await this.redisService.getRedis().del(pvs);
       await this.redisService.getRedis().del(ts);
+      await this.redisService.getRedis().del(rf);
       await this.redisService.getRedis().del(ps);
     }
   }
