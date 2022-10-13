@@ -15,6 +15,7 @@ import { ImageCaptcha, LoginToken, RefreshToken } from './login.class';
 import { LoginService } from './login.service';
 import { LogDisabled } from '../core/decorators/log-disabled.decorator';
 import { UtilService } from 'src/shared/services/utils.service';
+import { ILoginSign } from './login.service';
 
 @ApiTags('登录模块')
 @Controller()
@@ -42,7 +43,7 @@ export class LoginController {
     @Body() dto: LoginInfoDto,
     @Req() req: FastifyRequest,
     @Headers('user-agent') ua: string,
-  ): Promise<any> {
+  ): Promise<ILoginSign> {
     await this.loginService.checkImgCaptcha(dto.captchaId, dto.verifyCode);
     const token = await this.loginService.getLoginSign(
       dto.username,
@@ -50,7 +51,7 @@ export class LoginController {
       this.utils.getReqIP(req),
       ua,
     );
-    return { token };
+    return token;
   }
 
   @ApiOperation({ summary: '刷新token' })
@@ -58,7 +59,7 @@ export class LoginController {
   @Post('refresh')
   @LogDisabled()
   @Authorize()
-  async refresh(@Body() dto: RefreshInfoDto): Promise<object> {
+  async refresh(@Body() dto: RefreshInfoDto): Promise<string> {
     return this.loginService.refreshToken(dto.refreshToken);
   }
 }

@@ -11,6 +11,12 @@ import { JwtService } from '@nestjs/jwt';
 import { SysMenuService } from '../system/menu/menu.service';
 import { RedisService } from '@/shared/services/redis.service';
 
+export interface ILoginSign {
+  accessToken: string;
+  refreshToken: string;
+  expiration: number;
+}
+
 @Injectable()
 export class LoginService {
   constructor(
@@ -78,7 +84,7 @@ export class LoginService {
     password: string,
     ip: string,
     ua: string,
-  ): Promise<any> {
+  ): Promise<ILoginSign> {
     const user = await this.userService.findUserByUserName(username);
     // 用户不存在
     if (isEmpty(user)) {
@@ -91,13 +97,6 @@ export class LoginService {
       throw new ApiException(10003);
     }
     const perms = await this.menuService.getPerms(user.id);
-    // 系统管理员开放多点登录
-    if (user.id === 1) {
-      const oldToken = await this.getRedisTokenById(user.id);
-      if (oldToken) {
-        return oldToken;
-      }
-    }
     const accessToken = this.jwtService.sign(
       {
         uid: parseInt(user.id.toString()),
@@ -140,21 +139,27 @@ export class LoginService {
     // 过期时间
     const expiration = await this.redisService
       .getRedis()
-      .ttl(`admin:accessToken${user.id}`);
+      .ttl(`admin:accessToken:${user.id}`);
     return { accessToken, refreshToken, expiration };
   }
-
-  async refreshToken(refreshToken: string): Promise<object> {
+  /**
+   * 刷新accessToken
+   * @param refreshToken string
+   * @returns
+   */
+  async refreshToken(refreshToken: string): Promise<string> {
     if (isEmpty(refreshToken)) {
-      throw new ApiException(11001);
+      throw new ApiException(11002);
     }
     const decodeRefreshToken = await this.jwtService.verify(refreshToken);
     const { uid, pv } = decodeRefreshToken;
-    const redisToken = await this.redisService.getRedis().get(uid);
+    const redisToken = await this.redisService
+      .getRedis()
+      .get(`admin:refreshToken:${uid}`);
     if (refreshToken !== redisToken) {
       throw new ApiException(10003);
     }
-    const newAccessToken = this.jwtService.sign(
+    const accessToken = this.jwtService.sign(
       {
         uid,
         pv,
@@ -163,30 +168,10 @@ export class LoginService {
         expiresIn: '24h',
       },
     );
-    const newRefreshToken = this.jwtService.sign(
-      {
-        uid,
-        pv,
-      },
-      {
-        expiresIn: '7d',
-      },
-    );
     await this.redisService
       .getRedis()
-      .set(`admin:accessToken:${uid}`, newAccessToken, 'EX', 60 * 60 * 24);
-    await this.redisService
-      .getRedis()
-      .set(
-        `admin:refreshToken:${uid}`,
-        newRefreshToken,
-        'EX',
-        60 * 60 * 24 * 7,
-      );
-    return {
-      newRefreshToken,
-      newAccessToken,
-    };
+      .set(`admin:accessToken:${uid}`, accessToken, 'EX', 60 * 60 * 24);
+    return accessToken;
   }
 
   /**
@@ -205,7 +190,11 @@ export class LoginService {
     const perms = await this.menuService.getPerms(uid);
     return { menus, perms };
   }
-
+  /**
+   * 获取密码版本ID
+   * @param id
+   * @returns
+   */
   async getRedisPasswordVersionById(id: number): Promise<string> {
     return this.redisService.getRedis().get(`admin:passwordVersion:${id}`);
   }
@@ -218,10 +207,7 @@ export class LoginService {
     const accessToken = this.redisService
       .getRedis()
       .get(`admin:accessToken:${id}`);
-    const refreshToken = this.redisService
-      .getRedis()
-      .get(`admin:refreshToken${id}`);
-    return { accessToken, refreshToken };
+    return accessToken;
   }
 
   /**
