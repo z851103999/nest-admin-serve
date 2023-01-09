@@ -8,7 +8,6 @@ import {
 } from './config/configuration';
 import { AdminModule } from './modules/admin/admin.module';
 import { SharedModule } from './shared/shared.module';
-import { WSModule } from './modules/ws/ws.module';
 import { LoggerModule } from './shared/logger/logger.module';
 import {
   LoggerModuleOptions,
@@ -81,8 +80,6 @@ import './polyfill';
     SharedModule,
     // application modules import
     AdminModule,
-    // websocket module
-    WSModule,
     // mission
     MissionModule,
   ],

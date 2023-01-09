@@ -7,7 +7,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import SysMenu from '../../../../entities/admin/sys-menu.entity';
 import { IsNull, Not, Repository } from 'typeorm';
 import { CACHE_MANAGER, Inject } from '@nestjs/common';
-import { AdminWSService } from 'src/modules/ws/admin-ws.service';
 import { CreateMenuDto } from './menu.dto';
 import { RedisService } from '@/shared/services/redis.service';
 
@@ -15,7 +14,6 @@ export class SysMenuService {
   constructor(
     @InjectRepository(SysMenu)
     private menuRepository: Repository<SysMenu>,
-    private adminWSService: AdminWSService,
     @Inject(ROOT_ROLE_ID)
     private rootRoleId: number,
     private roleService: SysRoleService,
@@ -36,9 +34,6 @@ export class SysMenuService {
   async save(menu: CreateMenuDto & { id?: number }): Promise<void> {
     await this.menuRepository.save(menu);
     // 通过roleIds通知用户更新权限菜单
-    await this.adminWSService.noticeUserToUpdateMenusByRoleIds([
-      this.rootRoleId,
-    ]);
   }
   /**
    * 根据角色获取所有菜单
@@ -187,7 +182,6 @@ export class SysMenuService {
    */
   async deleteMenuItem(mids: number[]): Promise<void> {
     await this.menuRepository.delete(mids);
-    this.adminWSService.noticeUserToUpdateMenusByMenuIds(mids);
   }
   /**
    * 刷新指定用户ID的权限

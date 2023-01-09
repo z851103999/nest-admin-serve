@@ -26,7 +26,6 @@ import { SysUserController } from './user/user.controller';
 import { SysUserService } from './user/user.service';
 import { SysOnlineController } from './online/online.controller';
 import { SysOnlineService } from './online/online.service';
-import { WSModule } from '@/modules/ws/ws.module';
 import SysConfig from '@/entities/admin/sys-config.entity';
 import { SysParamConfigController } from './param-config/param-config.controller';
 import { SysParamConfigService } from './param-config/param-config.service';
@@ -71,7 +70,6 @@ import { SysTaskConsumer } from './task/task.processor';
       }),
       inject: [ConfigService],
     }),
-    WSModule,
   ],
   controllers: [
     SysUserController,

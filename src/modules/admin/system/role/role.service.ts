@@ -7,7 +7,7 @@ import SysRole from 'src/entities/admin/sys-role.entity';
 import SysUserRole from 'src/entities/admin/sys-user-role.entity';
 import { EntityManager, In, Like, Not, Repository } from 'typeorm';
 import { ROOT_ROLE_ID } from 'src/modules/admin/admin.constants';
-import { AdminWSService } from 'src/modules/ws/admin-ws.service';
+// import { AdminWSService } from 'src/modules/ws/admin-ws.service';
 import { CreateRoleDto, PageSearchRoleDto, UpdateRoleDto } from './role.dto';
 import { CreatedRoleId, RoleInfo } from './role.class';
 
@@ -23,8 +23,8 @@ export class SysRoleService {
     private userRoleRepository: Repository<SysUserRole>,
     @InjectEntityManager() private entityManager: EntityManager,
     @Inject(ROOT_ROLE_ID) private rootRoleId: number,
-    private adminWSService: AdminWSService,
-  ) {}
+  ) // private adminWSService: AdminWSService,
+  {}
 
   /**
    * 列举所有角色：除去超级管理员
@@ -183,7 +183,7 @@ export class SysRoleService {
     });
     // 如果勾选了新的菜单或取消勾选了原有的菜单，则通知前端重新获取权限菜单
     if ([insertMenusRowIds, deleteMenusRowIds].some((n) => n.length)) {
-      this.adminWSService.noticeUserToUpdateMenusByRoleIds([roleId]);
+      // this.adminWSService.noticeUserToUpdateMenusByRoleIds([roleId]);
     }
 
     return role;

@@ -1,4 +1,5 @@
 {
-	"commentTranslate.targetLanguage": "zh-CN",
-	"commentTranslate.source": "Bing"
+  "commentTranslate.targetLanguage": "zh-CN",
+  "commentTranslate.source": "Bing",
+  "nuxt.isNuxtApp": false
 }

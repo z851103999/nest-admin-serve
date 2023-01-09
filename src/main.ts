@@ -67,9 +67,6 @@ async function bootstrap() {
   await app.listen(PORT, '0.0.0.0', () => {
     Logger.log(`api服务已经启动,请访问 http://localhost:${PORT}`);
     Logger.log(
-      `ws服务已经启动,请访问 http://localhost:${process.env.WS_PORT}${process.env.WS_PATH}`,
-    );
-    Logger.log(
       `API文档已生成,请访问 http://localhost:${PORT}/${process.env.DOCS_PREFIX}`,
     );
   });
