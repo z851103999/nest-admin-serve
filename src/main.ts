@@ -1,3 +1,4 @@
+import { AllExceptionsFilter } from 'src/common/filters/all-exception.filter';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
@@ -5,8 +6,12 @@ import { AppModule } from './app.module';
 import { setupSwagger } from './setup-swagger';
 import history from 'connect-history-api-fallback';
 import helmet from 'helmet';
+import compression from 'compression';
 import { LoggerService } from './shared/logger/logger.service';
 import { Logger } from '@nestjs/common';
+import rateLimit from 'express-rate-limit';
+// webpack
+declare const module: any;
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -18,9 +23,25 @@ async function bootstrap() {
     }),
   );
 
+  // winston
   app.useLogger(app.get(LoggerService));
 
-  // app.useGlobalFilters(new ApiException(app.get(LoggerService)));
+  // global filters
+  app.useGlobalFilters(new AllExceptionsFilter(app.get(LoggerService)));
+
+  // gzip
+  app.use(compression());
+
+  // cors
+  app.enableCors();
+
+  //限速
+  app.use(
+    rateLimit({
+      windowMs: 15 * 60 * 1000, // 15 minutes
+      max: 100, // limit each IP to 100 requests per windowMs
+    }),
+  );
 
   /* 启动 vue 的 history模式 */
   app.use(
@@ -50,6 +71,12 @@ async function bootstrap() {
 
   /* 监听启动端口 */
   await app.listen(3000);
+
+  // webpack打包
+  if (module.hot) {
+    module.hot.accept();
+    module.hot.dispose(() => app.close());
+  }
 
   /* 打印swagger地址 */
   console.log('http://127.0.0.1:3000/swagger-ui/');
