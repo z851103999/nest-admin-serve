@@ -1,21 +1,22 @@
 import { HttpException } from '@nestjs/common';
-import { ErrorCodeMap } from '../contants/error-code.contants';
 
 /**
- * APi业务列席错误代码，非HTTP CODE
+ *  自定义异常
  */
 export class ApiException extends HttpException {
-  private errorCode: number;
-
-  constructor(errorCode: number) {
-    super(ErrorCodeMap[errorCode], 200);
-    this.errorCode = errorCode;
+  private errCode: number;
+  constructor(msg: string, errCode?: number) {
+    //权限问题一律使用401错误码
+    if (errCode && errCode == 401) {
+      super(msg, 200);
+      this.errCode = 401;
+    } else {
+      //其他异常一律使用500错误码
+      super(msg, errCode ?? 200);
+      this.errCode = errCode ?? 500;
+    }
   }
-
-  /**
-   * 获取错误代码
-   */
-  getErrorCode(): number {
-    return this.errorCode;
+  getErrCode(): number {
+    return this.errCode;
   }
 }

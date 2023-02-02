@@ -36,16 +36,16 @@ export interface LoggerModuleOptions {
   disableConsoleAtProd?: boolean;
 
   /**
-   * Maximum size of the file after which it will rotate. This can be a number of bytes, or units of kb, mb, and gb.
-   *  If using the units, add 'k', 'm', or 'g' as the suffix. The units need to directly follow the number.
-   *  default: 2m
+   * 文件的最大大小后，它将旋转。可以是字节数，也可以是kb、mb和gb的单位。
+   * 如果使用单位，则添加“k”，“m”或“g”作为后缀。单位需要直接跟随数字。
+   * 默认:2m
    */
   maxFileSize?: string;
 
   /**
-   * Maximum number of logs to keep. If not set,
-   * no logs will be removed. This can be a number of files or number of days. If using days, add 'd' as the suffix.
-   * default: 15d
+   * 要保留的最大日志数量。如果没有设置，
+   * 不会删除任何日志。这可以是文件的数量或天数。如果使用days，则添加“d”作为后缀。
+   * 默认值:15d
    */
   maxFiles?: string;
 

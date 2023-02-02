@@ -1,23 +1,21 @@
-import { DynamicModule, Module } from '@nestjs/common';
 import { LOGGER_MODULE_OPTIONS } from './logger.constants';
-import {
-  LoggerModuleAsyncOptions,
-  LoggerModuleOptions,
-} from './logger.interface';
 import { LoggerService } from './logger.service';
+import {
+  LoggerModuleOptions,
+  LoggerModuleAsyncOptions,
+} from './logger.interface';
+import { DynamicModule, Module } from '@nestjs/common';
 
 @Module({})
 export class LoggerModule {
-  static forRoot(
-    options: LoggerModuleOptions,
-    isGlobal = false,
-  ): DynamicModule {
+  static forRoot(options: LoggerModuleOptions, isGlobal): DynamicModule {
     return {
       global: isGlobal,
       module: LoggerModule,
       providers: [
         LoggerService,
         {
+          // 记录模块
           provide: LOGGER_MODULE_OPTIONS,
           useValue: options,
         },

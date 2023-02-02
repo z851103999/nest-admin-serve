@@ -13,7 +13,7 @@
     "outDir": "./dist",
     "baseUrl": "./",
     "incremental": true,
-    "lib": ["ESNext"],
+    "lib": ["ESNext", "dom"],
     "paths": {
       "@/*": ["src/*"]
     }

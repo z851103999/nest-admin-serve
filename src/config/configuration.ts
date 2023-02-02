@@ -1,52 +1,70 @@
-import { MysqlConnectionOptions } from 'typeorm/driver/mysql/MysqlConnectionOptions';
+import { Logger } from '@nestjs/common';
 
-export const getConfiguration = () =>
-  ({
-    rootRoleId: parseInt(process.env.ROOT_ROLE_ID || '1'),
-    // jwt
-    jwt: {
-      secret: process.env.JWT_SECRET || '123456',
-    },
-    // typeorm config
-    database: {
-      type: 'mysql',
-      host: process.env.MYSQL_HOST,
-      port: Number.parseInt(process.env.MYSQL_PORT, 10),
-      username: process.env.MYSQL_USERNAME,
-      password: process.env.MYSQL_PASSWORD,
-      database: process.env.MYSQL_DATABASE,
-      entities: [__dirname + '/../**/entities/*.entity.{ts,js}'],
-      autoLoadEntities: true,
-      synchronize: false,
-      logging: ['error'],
-      timezone: '+08:00', // 东八区
-    } as MysqlConnectionOptions,
-    // redis
-    redis: {
-      host: process.env.REDIS_HOST, // default value
-      port: parseInt(process.env.REDIS_PORT, 10), // default value
-      password: process.env.REDIS_PASSWORD,
-      db: process.env.REDIS_DB,
-    },
-    // logger config
-    logger: {
-      timestamp: false,
-      dir: process.env.LOGGER_DIR,
-      maxFileSize: process.env.LOGGER_MAX_SIZE,
-      maxFiles: process.env.LOGGER_MAX_FILES,
-      errorLogName: process.env.LOGGER_ERROR_FILENAME,
-      appLogName: process.env.LOGGER_APP_FILENAME,
-    },
-    // swagger
-    swagger: {
-      enable: process.env.SWAGGER_ENABLE === 'true',
-      path: process.env.SWAGGER_PATH,
-      title: process.env.SWAGGER_TITLE,
-      desc: process.env.SWAGGER_DESC,
-      version: process.env.SWAGGER_VERSION,
-    },
-  } as const);
+// 判断系统是否是开发环境
+export function isDev(): boolean {
+  return process.env.NODE_ENV === 'development';
+}
 
-export type ConfigurationType = ReturnType<typeof getConfiguration>;
+// 根据环境变量判断使用配置
+export default () => {
+  let envConfig: IConfig = {};
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    envConfig = require(`./config.${process.env.NODE_ENV}`).default;
+    //将文件上传路径绑定到环境变量上
+    process.env.uploadPath = envConfig.uploadPath ?? '/upload';
+  } catch (e) {
+    const logger = new Logger('ConfigModule');
+    logger.error(e);
+  }
 
-export type ConfigurationKeyPaths = Record<NestedKeyOf<ConfigurationType>, any>;
+  // 返回环境配置
+  return envConfig;
+};
+
+// 配置文件接口
+export interface IConfig {
+  /**
+   * 后台管理jwt token密钥
+   */
+  jwt?: {
+    secret: string;
+  };
+
+  /**
+   * 文件上传路径， 绝对路径  例如： E:/upload/test
+   */
+  uploadPath?: string;
+
+  /**
+   * 数据库配置
+   */
+  database?: {
+    type?: string;
+    host?: string;
+    port?: number | string;
+    username?: string;
+    password?: string;
+    database?: string;
+    autoLoadModels: boolean; // 如果为true，模型将自动载入（默认:false)
+    synchronize?: boolean; //如果为true，自动载入的模型将同步
+    logging?: any;
+  };
+
+  /**
+   * redis 配置
+   */
+  redis?: {
+    config: {
+      url: string;
+    };
+  };
+
+  /* 队列配置 */
+
+  bullRedis?: {
+    host: string;
+    port: string;
+    password: string;
+  };
+}

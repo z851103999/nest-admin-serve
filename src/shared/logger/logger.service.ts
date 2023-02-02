@@ -1,3 +1,4 @@
+import { join } from 'path';
 import {
   Injectable,
   Optional,
@@ -5,6 +6,12 @@ import {
   LoggerService as NestLoggerService,
 } from '@nestjs/common';
 import { clc, yellow } from '@nestjs/common/utils/cli-colors.util';
+import { createLogger, Logger as WinstonLogger, format } from 'winston';
+import WinstonDailyRotateFile from 'winston-daily-rotate-file';
+import { isDev } from '../../config/configuration';
+import { isPlainObject } from 'lodash';
+import { getAppRootPath } from './utils/app-root-path.util';
+import { LoggerModuleOptions, WinstonLogLevel } from './logger.interface';
 import {
   DEFAULT_ERROR_LOG_NAME,
   DEFAULT_MAX_SIZE,
@@ -12,13 +19,6 @@ import {
   LOGGER_MODULE_OPTIONS,
   PROJECT_LOG_DIR_NAME,
 } from './logger.constants';
-import { LoggerModuleOptions, WinstonLogLevel } from './logger.interface';
-import { getAppRootPath } from './utils/app-root-path.util';
-import { createLogger, Logger as WinstonLogger, format } from 'winston';
-import { join } from 'path';
-import WinstonDailyRotateFile from 'winston-daily-rotate-file';
-import { isDev } from 'src/config/env';
-import { isPlainObject } from 'lodash';
 
 /**
  * 默认输出的日志等级
@@ -28,7 +28,6 @@ const DEFAULT_LOG_WINSTON_LEVELS: WinstonLogLevel = 'info';
 
 /**
  * 日志输出等级，基于Nest配置扩展，与winston配合，由于log等级与winston定义冲突，需要转为info
- * https://github.com/nestjs/nest/blob/master/packages/common/services/utils/is-log-level-enabled.util.ts
  */
 const LOG_LEVEL_VALUES: Record<WinstonLogLevel, number> = {
   debug: 4,
@@ -40,7 +39,6 @@ const LOG_LEVEL_VALUES: Record<WinstonLogLevel, number> = {
 
 @Injectable()
 export class LoggerService implements NestLoggerService {
-  /** 最后时间戳 */
   private static lastTimestampAt?: number;
   /**
    * 日志文件存放文件夹路径
@@ -133,8 +131,8 @@ export class LoggerService implements NestLoggerService {
   }
 
   /**
-   * 编写“信息”级别日志，如果配置的级别允许。
-   * 打印到带有换行符的“标准输出”。
+   * Write a 'info' level log, if the configured level allows for it.
+   * Prints to `stdout` with newline.
    */
   log(message: any, context?: string): void;
   log(message: any, ...optionalParams: [...any, string?]): void;
@@ -155,8 +153,8 @@ export class LoggerService implements NestLoggerService {
   }
 
   /**
-   * 如果配置的级别允许，请编写“错误”级别日志。
-   * 打印到带有换行符的“stderr”。
+   * Write an 'error' level log, if the configured level allows for it.
+   * Prints to `stderr` with newline.
    */
   error(message: any, context?: string): void;
   error(message: any, stack?: string, context?: string): void;
@@ -177,8 +175,8 @@ export class LoggerService implements NestLoggerService {
   }
 
   /**
-   * 如果配置的级别允许，请编写“警告”级别日志。
-   * 打印到带有换行符的“标准输出”。e.
+   * Write a 'warn' level log, if the configured level allows for it.
+   * Prints to `stdout` with newline.
    */
   warn(message: any, context?: string): void;
   warn(message: any, ...optionalParams: [...any, string?]): void;
@@ -199,8 +197,8 @@ export class LoggerService implements NestLoggerService {
   }
 
   /**
-   * 编写“调试”级别日志（如果配置的级别允许）。
-   * 打印到带有换行符的“标准输出”。
+   * Write a 'debug' level log, if the configured level allows for it.
+   * Prints to `stdout` with newline.
    */
   debug(message: any, context?: string): void;
   debug(message: any, ...optionalParams: [...any, string?]): void;
@@ -221,8 +219,8 @@ export class LoggerService implements NestLoggerService {
   }
 
   /**
-   * 编写“详细”级别日志（如果配置的级别允许）。
-   * 打印到带有换行符的“标准输出”。
+   * Write a 'verbose' level log, if the configured level allows for it.
+   * Prints to `stdout` with newline.
    */
   verbose(message: any, context?: string): void;
   verbose(message: any, ...optionalParams: [...any, string?]): void;
@@ -241,11 +239,7 @@ export class LoggerService implements NestLoggerService {
     }
     this.recordMessages(messages, context, 'verbose');
   }
-  /**
-   * 是否启用了控制台级别输出
-   * @param level
-   * @returns
-   */
+
   protected isConsoleLevelEnabled(level: WinstonLogLevel): boolean {
     // 默认禁止生产模式控制台日志输出
     if (!isDev() && !this.options.disableConsoleAtProd) {
@@ -256,11 +250,7 @@ export class LoggerService implements NestLoggerService {
     }
     return LOG_LEVEL_VALUES[level] <= LOG_LEVEL_VALUES[level];
   }
-  /**
-   * 是否启用了温斯顿级别
-   * @param level
-   * @returns
-   */
+
   protected isWinstonLevelEnabled(level: WinstonLogLevel): boolean {
     // 默认禁止生产模式控制台日志输出
     if (this.options.level === 'none') {
@@ -284,13 +274,7 @@ export class LoggerService implements NestLoggerService {
       localeStringOptions as Intl.DateTimeFormatOptions,
     );
   }
-  /**
-   * 记录消息
-   * @param messages
-   * @param context
-   * @param logLevel
-   * @param stack
-   */
+
   protected recordMessages(
     messages: unknown[],
     context = '',
@@ -315,13 +299,7 @@ export class LoggerService implements NestLoggerService {
       });
     });
   }
-  /**
-   * 打印日志
-   * @param messages
-   * @param context
-   * @param logLevel
-   * @param writeStreamType
-   */
+
   protected printMessages(
     messages: unknown[],
     context = '',
@@ -348,21 +326,14 @@ export class LoggerService implements NestLoggerService {
       process[writeStreamType ?? 'stdout'].write(computedMessage);
     });
   }
-  /**
-   * 打印堆栈跟踪
-   * @param stack
-   * @returns
-   */
+
   protected printStackTrace(stack: string) {
     if (!stack) {
       return;
     }
     process.stderr.write(`${stack}\n`);
   }
-  /**
-   * 更新获取时间戳的差异
-   * @returns
-   */
+
   private updateAndGetTimestampDiff(): string {
     const includeTimestamp =
       LoggerService.lastTimestampAt && this.options?.timestamp;
@@ -372,11 +343,7 @@ export class LoggerService implements NestLoggerService {
     LoggerService.lastTimestampAt = Date.now();
     return result;
   }
-  /**
-   * 获取要打印的上下文消息
-   * @param args
-   * @returns
-   */
+
   private getContextAndMessagesToPrint(args: unknown[]) {
     if (args?.length <= 1) {
       return { messages: args, context: this.context };
@@ -391,11 +358,7 @@ export class LoggerService implements NestLoggerService {
       messages: args.slice(0, args.length - 1),
     };
   }
-  /**
-   * 获取要打印的上下文、堆栈和消息
-   * @param args
-   * @returns
-   */
+
   private getContextAndStackAndMessagesToPrint(args: unknown[]) {
     const { messages, context } = this.getContextAndMessagesToPrint(args);
     if (messages?.length <= 1) {
@@ -412,11 +375,7 @@ export class LoggerService implements NestLoggerService {
       context,
     };
   }
-  /**
-   * 按日志级别获取颜色
-   * @param level
-   * @returns
-   */
+
   private getColorByLogLevel(level: WinstonLogLevel): (text: string) => string {
     switch (level) {
       case 'debug':

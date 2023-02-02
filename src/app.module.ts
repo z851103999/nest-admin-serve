@@ -1,87 +1,66 @@
-import { MissionModule } from './mission/mission.module';
-import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import {
-  ConfigurationKeyPaths,
-  getConfiguration,
-} from './config/configuration';
-import { AdminModule } from './modules/admin/admin.module';
+import { SysConfigModule } from './modules/system/sys-config/sys-config.module';
+import { CommonModule } from './modules/common/common.module';
+import { LoginModule } from './modules/login/login.module';
 import { SharedModule } from './shared/shared.module';
-import { LoggerModule } from './shared/logger/logger.module';
-import {
-  LoggerModuleOptions,
-  WinstonLogLevel,
-} from './shared/logger/logger.interface';
-import { TypeORMLoggerService } from './shared/logger/typeorm-logger.service';
-import { LOGGER_MODULE_OPTIONS } from './shared/logger/logger.constants';
-import { BullModule } from '@nestjs/bull';
-import './polyfill';
+import { ExistingProvider, Module } from '@nestjs/common';
+import configuration from './config/configuration';
+import { ConfigModule } from '@nestjs/config';
+import { AuthModule } from './modules/system/auth/auth.module';
+import { UserModule } from './modules/system/user/user.module';
+import { DictModule } from './modules/system/dict/dict.module';
+import { NoticeModule } from './modules/system/notice/notice.module';
+import { PostModule } from './modules/system/post/post.module';
+import { DeptModule } from './modules/system/dept/dept.module';
+import { MenuModule } from './modules/system/menu/menu.module';
+import { RoleModule } from './modules/system/role/role.module';
+import { LogModule } from './modules/monitor/log/log.module';
+import { OnlineModule } from './modules/monitor/online/online.module';
+import { JobModule } from './modules/monitor/job/job.module';
+import { ServerModule } from './modules/monitor/server/server.module';
+import { JobService } from './modules/monitor/job/job.service';
+
+/* 将 provider的类名作为别名，方便定时器调用 */
+const providers = [JobService];
+function createAliasProviders(): ExistingProvider[] {
+  const aliasProviders: ExistingProvider[] = [];
+  for (const p of providers) {
+    aliasProviders.push({
+      provide: p.name,
+      useExisting: p,
+    });
+  }
+  return aliasProviders;
+}
+const aliasProviders = createAliasProviders();
 
 @Module({
   imports: [
+    /* 配置文件模块 */
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [getConfiguration],
-      envFilePath: [`.env.${process.env.NODE_ENV}`, '.env'],
+      load: [configuration],
     }),
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule, LoggerModule],
-      useFactory: (
-        configService: ConfigService<ConfigurationKeyPaths>,
-        loggerOptions: LoggerModuleOptions,
-      ) => ({
-        autoLoadEntities: true,
-        type: configService.get<any>('database.type'),
-        host: configService.get<string>('database.host'),
-        port: configService.get<number>('database.port'),
-        username: configService.get<string>('database.username'),
-        password: configService.get<string>('database.password'),
-        database: configService.get<string>('database.database'),
-        synchronize: configService.get<boolean>('database.synchronize'),
-        logging: configService.get('database.logging'),
-        timezone: configService.get('database.timezone'), // 时区
-        // 自定义日志
-        logger: new TypeORMLoggerService(
-          configService.get('database.logging'),
-          loggerOptions,
-        ),
-      }),
-      inject: [ConfigService, LOGGER_MODULE_OPTIONS],
-    }),
-    BullModule.forRoot({}),
-    // custom logger
-    LoggerModule.forRootAsync(
-      {
-        imports: [ConfigModule],
-        useFactory: (configService: ConfigService) => {
-          return {
-            level: configService.get<WinstonLogLevel>('logger.level'),
-            consoleLevel: configService.get<WinstonLogLevel>(
-              'logger.consoleLevel',
-            ),
-            timestamp: configService.get<boolean>('logger.timestamp'),
-            maxFiles: configService.get<string>('logger.maxFiles'),
-            maxFileSize: configService.get<string>('logger.maxFileSize'),
-            disableConsoleAtProd: configService.get<boolean>(
-              'logger.disableConsoleAtProd',
-            ),
-            dir: configService.get<string>('logger.dir'),
-            errorLogName: configService.get<string>('logger.errorLogName'),
-            appLogName: configService.get<string>('logger.appLogName'),
-          };
-        },
-        inject: [ConfigService],
-      },
-      // global module
-      true,
-    ),
-    // custom module
+
+    /* 公共模块 */
     SharedModule,
-    // application modules import
-    AdminModule,
-    // mission
-    MissionModule,
+
+    /* 业务模块 */
+    CommonModule,
+    LoginModule,
+    AuthModule,
+    UserModule,
+    DictModule,
+    SysConfigModule,
+    NoticeModule,
+    PostModule,
+    DeptModule,
+    MenuModule,
+    RoleModule,
+    LogModule,
+    OnlineModule,
+    JobModule,
+    ServerModule,
   ],
+  providers: [...aliasProviders],
 })
 export class AppModule {}

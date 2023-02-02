@@ -1,5 +1,5 @@
 {
-  "commentTranslate.targetLanguage": "zh-CN",
-  "commentTranslate.source": "Bing",
-  "nuxt.isNuxtApp": false
+  "nuxt.isNuxtApp": false,
+  "commentTranslate.source": "DarkCWK.youdao-youdao",
+  "cSpell.words": ["Reponse"]
 }

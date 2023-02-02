@@ -1,74 +1,61 @@
-import { LoggerService } from './shared/logger/logger.service';
-import { NestFactory, Reflector } from '@nestjs/core';
-import {
-  FastifyAdapter,
-  NestFastifyApplication,
-} from '@nestjs/platform-fastify';
+import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
 import { AppModule } from './app.module';
-import {
-  flatten,
-  HttpStatus,
-  Logger,
-  UnprocessableEntityException,
-  ValidationError,
-  ValidationPipe,
-} from '@nestjs/common';
-import { ApiExceptionFilter } from './common/filters/api-exception.filter';
-import { ApiTransformInterceptor } from './common/interceptors/api-transform.interceptor';
-import { setupSwagger } from './shared/swagger/setup-swagger';
-
-declare const module: any;
-
-const PORT = process.env.PORT;
+import { setupSwagger } from './setup-swagger';
+import history from 'connect-history-api-fallback';
+import helmet from 'helmet';
+import { LoggerService } from './shared/logger/logger.service';
+import { Logger } from '@nestjs/common';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestFastifyApplication>(
-    AppModule,
-    new FastifyAdapter(),
-    {
-      bufferLogs: true,
-    },
-  );
-  // 启动跨域 cors
-  app.enableCors();
-  // logger
-  app.useLogger(app.get(LoggerService));
-  // 全局管道
-  app.useGlobalPipes(
-    new ValidationPipe({
-      transform: true,
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      // code 422
-      errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-      exceptionFactory: (errors: ValidationError[]) => {
-        return new UnprocessableEntityException(
-          flatten(
-            errors
-              .filter((item) => !!item.constraints)
-              .map((item) => Object.values(item.constraints)),
-          ).join('; '),
-        );
-      },
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  /* 设置 HTTP 标头来帮助保护应用免受一些众所周知的 Web 漏洞的影响 */
+  app.use(
+    helmet({
+      contentSecurityPolicy: false, //取消https强制转换
     }),
   );
-  // 全局过滤器
-  app.useGlobalFilters(new ApiExceptionFilter(app.get(LoggerService)));
-  // 全局拦截器
-  app.useGlobalInterceptors(new ApiTransformInterceptor(new Reflector()));
-  // swagger
-  setupSwagger(app);
-  // 添加热更新
-  if (module.hot) {
-    module.hot.accept();
-    module.hot.dispose(() => app.close());
+
+  app.useLogger(app.get(LoggerService));
+
+  // app.useGlobalFilters(new ApiException(app.get(LoggerService)));
+
+  /* 启动 vue 的 history模式 */
+  app.use(
+    history({
+      rewrites: [
+        {
+          from: /^\/swagger-ui\/.*$/,
+          to: function (context) {
+            return context.parsedUrl.pathname;
+          },
+        },
+      ],
+    }),
+  );
+
+  /* 配置静态资源目录 */
+  app.useStaticAssets(join(__dirname, '../public'));
+  /* 配置上传文件目录为 资源目录 */
+  if (process.env.uploadPath) {
+    app.useStaticAssets(process.env.uploadPath, {
+      prefix: '/upload',
+    });
   }
 
-  await app.listen(PORT, '0.0.0.0', () => {
-    Logger.log(`api服务已经启动,请访问 http://localhost:${PORT}`);
-    Logger.log(
-      `API文档已生成,请访问 http://localhost:${PORT}/${process.env.DOCS_PREFIX}`,
-    );
-  });
+  /* 启动swagger */
+  setupSwagger(app);
+
+  /* 监听启动端口 */
+  await app.listen(3000);
+
+  /* 打印swagger地址 */
+  console.log('http://127.0.0.1:3000/swagger-ui/');
+  // 根据操作系统和IP版本返回应用程序正在监听的url。
+  const serverUrl = await app.getUrl();
+  Logger.log(`api服务已经启动,请访问: ${serverUrl}`);
+  Logger.log(`API文档已生成,请访问: ${serverUrl}/swagger-ui/`);
 }
 bootstrap();
