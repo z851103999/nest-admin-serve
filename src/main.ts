@@ -1,4 +1,3 @@
-import { AllExceptionsFilter } from 'src/common/filters/all-exception.filter';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
@@ -9,7 +8,7 @@ import helmet from 'helmet';
 import compression from 'compression';
 import { LoggerService } from './shared/logger/logger.service';
 import { Logger } from '@nestjs/common';
-import rateLimit from 'express-rate-limit';
+
 // webpack
 declare const module: any;
 
@@ -26,22 +25,11 @@ async function bootstrap() {
   // winston
   app.useLogger(app.get(LoggerService));
 
-  // global filters
-  app.useGlobalFilters(new AllExceptionsFilter(app.get(LoggerService)));
-
   // gzip
   app.use(compression());
 
   // cors
   app.enableCors();
-
-  //限速
-  app.use(
-    rateLimit({
-      windowMs: 15 * 60 * 1000, // 15 minutes
-      max: 100, // limit each IP to 100 requests per windowMs
-    }),
-  );
 
   /* 启动 vue 的 history模式 */
   app.use(

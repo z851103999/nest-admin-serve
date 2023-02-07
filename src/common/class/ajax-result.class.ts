@@ -6,17 +6,17 @@ export class AjaxResult {
   readonly msg: string;
   [key: string]: any;
 
-  constructor(code, msg, data) {
+  constructor(code: number, msg: string, data: any) {
     this.code = code;
     this.msg = msg;
-    Object.assign(this, data);
+    this.data = data;
   }
 
-  static success(data?: any, msg = '操作成功') {
+  static success(data?: any, msg?: string) {
     return new AjaxResult(200, msg, data);
   }
 
-  static error(msg = '操作失败', code = 500) {
-    return new AjaxResult(code, msg, null);
+  static error(code: number, msg?: string, data?: any) {
+    return new AjaxResult(code || 500, msg || 'error', data);
   }
 }
