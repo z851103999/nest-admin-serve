@@ -53,7 +53,8 @@ export class ExcelService {
       }
       return result;
     } catch (error) {
-      throw new ApiException('文件格式错误');
+      // 文件格式错误
+      throw new ApiException(12001);
     }
   }
 

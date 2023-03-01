@@ -35,7 +35,8 @@ export class DictService {
       reqAddDictTypeDto.dictType,
       (reqAddDictTypeDto as DictType).dictId,
     );
-    if (dictType) throw new ApiException('该字典类型已存在，请更换');
+    // 该字典类型已存在，请更换
+    if (dictType) throw new ApiException(10114);
     await this.dictTypeRepository.save(reqAddDictTypeDto);
   }
 
@@ -93,9 +94,8 @@ export class DictService {
     const errorList = dictTypeList.filter((item) => item.dictDatas.length);
     if (errorList.length) {
       const idArr = errorList.map((item) => item.dictId);
-      throw new ApiException(
-        `字典编号为${idArr.join('、')}的字典存在字典值，请先删除字典值`,
-      );
+      // 字典编号为${idArr.join('、')}的字典存在字典值，请先删除字典值
+      throw new ApiException(10115);
     } else {
       await this.dictTypeRepository.delete(dictIdArr);
     }
@@ -178,7 +178,8 @@ export class DictService {
       reqAddDictDataDto.dictValue,
       (reqAddDictDataDto as any).dictCode,
     );
-    if (oneDictData) throw new ApiException('该数据键值已存在，请更换');
+    // 改字典类型已存在，请更换
+    if (oneDictData) throw new ApiException(10114);
     const dictType = await this.findByDictType(reqAddDictDataDto.dictType);
     const dictData = Object.assign(
       new DictData(),

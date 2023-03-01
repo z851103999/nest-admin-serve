@@ -22,7 +22,7 @@ export class AuthService {
   async checkImgCaptcha(uuid: string, code: string) {
     const result = await this.redis.get(`${CAPTCHA_IMG_KEY}:${uuid}`);
     if (isEmpty(result) || code.toLowerCase() !== result.toLowerCase()) {
-      throw new ApiException('验证码错误');
+      throw new ApiException(10002);
     }
     await this.redis.del(`${CAPTCHA_IMG_KEY}:${uuid}`);
   }
@@ -30,20 +30,19 @@ export class AuthService {
   /* 判断用户账号密码是否正确 */
   async validateUser(username: string, password: string) {
     const user = await this.userService.findOneByUsername(username);
-    if (!user) throw new ApiException('用户名或密码错误');
+    if (!user) throw new ApiException(10003);
     const comparePassword = this.sharedService.md5(password + user.salt);
-    if (comparePassword !== user.password)
-      throw new ApiException('用户名或密码错误');
+    if (comparePassword !== user.password) throw new ApiException(10003);
     return user;
   }
 
   /* 判断token 是否过期 或者被重置 */
   async validateToken(userId: number, pv: number, restoken: string) {
     const token = await this.redis.get(`${USER_TOKEN_KEY}:${userId}`);
-    if (restoken !== token) throw new ApiException('登录状态已过期', 401);
+    if (restoken !== token) throw new ApiException(11002);
     const passwordVersion = parseInt(
       await this.redis.get(`${USER_VERSION_KEY}:${userId}`),
     );
-    if (pv !== passwordVersion) throw new ApiException('用户信息已被修改', 401);
+    if (pv !== passwordVersion) throw new ApiException(10104);
   }
 }

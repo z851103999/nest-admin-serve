@@ -10,7 +10,6 @@ import {
   StreamableFile,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { DataObj } from 'src/common/class/data-obj.class';
 import {
   ApiDataResponse,
   typeEnum,
@@ -67,8 +66,7 @@ export class JobController {
   @RequiresPermissions('monitor:job:query')
   @ApiDataResponse(typeEnum.object, Job)
   async oneJob(@Param('jobId') jobId: number) {
-    const job = await this.jobService.oneJob(jobId);
-    return DataObj.create(job);
+    return await this.jobService.oneJob(jobId);
   }
 
   /* 编辑任务 */

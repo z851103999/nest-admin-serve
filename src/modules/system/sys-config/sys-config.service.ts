@@ -27,7 +27,7 @@ export class SysConfigService {
       reqAddConfigDto.configKey,
       (reqAddConfigDto as SysConfig).configId,
     );
-    if (sysConfig) throw new ApiException('参数键值已存在，请更换');
+    if (sysConfig) throw new ApiException(10110);
     return await this.sysConfigRepository.save(reqAddConfigDto);
   }
 

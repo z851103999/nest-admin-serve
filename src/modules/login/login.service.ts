@@ -48,6 +48,7 @@ export class LoginService {
       width: 115.5,
       height: 38,
     });
+    console.log(data, text);
     const result = {
       img: data.toString(),
       uuid: this.sharedService.generateUUID(),
@@ -102,7 +103,7 @@ export class LoginService {
   /* 获取用户信息 */
   async getInfo(userId: number): Promise<ResInfo> {
     const user: User = await this.userService.findOneUserAllById(userId);
-    if (!user) throw new ApiException('用户信息已被修改', 401);
+    if (!user) throw new ApiException(10104);
     const deptId = user.dept ? user.dept.deptId : '';
     const deptName = user.dept ? user.dept.deptName : '';
     const roleKeyArr: string[] = user.roles.map((role) => role.roleKey);

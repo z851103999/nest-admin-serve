@@ -12,14 +12,13 @@ import { tap } from 'rxjs/operators';
 import { OperLog } from 'src/modules/monitor/log/entities/oper_log.entity';
 import { LogService } from 'src/modules/monitor/log/log.service';
 import { SharedService } from 'src/shared/shared.service';
-import { AjaxResult } from '../class/ajax-result.class';
 import { LOG_KEY_METADATA } from '../contants/decorator.contant';
 import {
   USER_DEPTNAME_KEY,
   USER_USERNAME_KEY,
 } from '../contants/redis.contant';
 import { LogOption } from '../decorators/log.decorator';
-import { AllExceptionsFilter } from '../filters/all-exception.filter';
+import { ApiExceptionFilter } from '../filters/all-exception.filter';
 import dayjs from 'dayjs';
 
 /**
@@ -41,8 +40,8 @@ export class OperationLogInterceptor implements NestInterceptor {
         },
         error: (e) => {
           console.log(e);
-          const allExceptionsFilter = new AllExceptionsFilter(e);
-          const { result } = allExceptionsFilter.errorResult(e);
+          const allExceptionsFilter = new ApiExceptionFilter(e);
+          const { result } = allExceptionsFilter.catch(e);
           return this.log(context, result);
         },
       }),
@@ -50,7 +49,7 @@ export class OperationLogInterceptor implements NestInterceptor {
   }
 
   /* 记录操作日志 */
-  async log(context: ExecutionContext, data: AjaxResult) {
+  async log(context: ExecutionContext, data: any) {
     const logOption = this.reflector.get<LogOption>(
       LOG_KEY_METADATA,
       context.getHandler(),

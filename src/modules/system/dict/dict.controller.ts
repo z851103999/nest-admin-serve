@@ -14,7 +14,6 @@ import {
   StreamableFile,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { DataObj } from 'src/common/class/data-obj.class';
 import {
   ApiDataResponse,
   typeEnum,
@@ -88,11 +87,8 @@ export class DictController {
   @Get('/dict/type/:typeId')
   @RequiresPermissions('system:dict:query')
   @ApiDataResponse(typeEnum.object, DictType)
-  async oneDictType(
-    @Param('typeId') typeId: number,
-  ): Promise<DataObj<DictType>> {
-    const dictType = await this.dictService.findDictTypeById(typeId);
-    return DataObj.create(dictType);
+  async oneDictType(@Param('typeId') typeId: number): Promise<DictType> {
+    return await this.dictService.findDictTypeById(typeId);
   }
 
   /* 编辑字典类型 */
@@ -111,9 +107,8 @@ export class DictController {
   @Get('dict/data/type/:dictType')
   async dictDataByDictType(
     @Param('dictType') dictType: string,
-  ): Promise<DataObj<DictData[]>> {
-    const dictDataArr = await this.dictService.getDictDataByDictType(dictType);
-    return DataObj.create(dictDataArr);
+  ): Promise<DictData[]> {
+    return await this.dictService.getDictDataByDictType(dictType);
   }
 
   /* 分页查询字典数据列表 */
@@ -136,7 +131,8 @@ export class DictController {
       reqAddDictDataDto.dictType,
       reqAddDictDataDto.dictValue,
     );
-    if (dictData) throw new ApiException('该数据键值已存在，请更换');
+    // 该数据键值已存在，请更换
+    if (dictData) throw new ApiException(10107);
     reqAddDictDataDto.createBy = reqAddDictDataDto.updateBy = userName;
     await this.dictService.addOrUpdateDictData(reqAddDictDataDto);
   }
@@ -145,8 +141,7 @@ export class DictController {
   @Get('dict/data/:dictCode')
   @ApiDataResponse(typeEnum.object, ReqUpdateDictDataDto)
   async oneDictData(@Param('dictCode') dictCode: number) {
-    const dictData = await this.dictService.findDictDataById(dictCode);
-    return DataObj.create(dictData);
+    return await this.dictService.findDictDataById(dictCode);
   }
 
   /* 编辑字典数据 */

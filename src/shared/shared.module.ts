@@ -18,7 +18,7 @@ import { LogModule } from 'src/modules/monitor/log/log.module';
 import { BullModule } from '@nestjs/bull';
 import { DataScopeInterceptor } from 'src/common/interceptors/data-scope.interceptor';
 import { RepeatSubmitGuard } from 'src/common/guards/repeat-submit.guard';
-import { AllExceptionsFilter } from 'src/common/filters/all-exception.filter';
+import { ApiExceptionFilter } from 'src/common/filters/all-exception.filter';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { LOGGER_MODULE_OPTIONS } from './logger/logger.constants';
 import { LoggerModule } from './logger/logger.module';
@@ -113,7 +113,7 @@ import { LoggerModule } from './logger/logger.module';
     //全局异常过滤器
     {
       provide: APP_FILTER,
-      useClass: AllExceptionsFilter,
+      useClass: ApiExceptionFilter,
     },
 
     //全局参数校验管道

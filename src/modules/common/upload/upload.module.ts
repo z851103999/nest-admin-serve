@@ -37,7 +37,7 @@ export function storage(uploadPath) {
       let originalname = file.originalname;
       //如果文件没有后缀就获取文件后缀进行拼接
       if (file.originalname.lastIndexOf('.') < 0) {
-        //获取文件后缀
+        // 获取文件后缀
         const mimeType = new MIMEType(file.mimetype);
         const subtype = mimeType.subtype;
         originalname = file.originalname + '.' + subtype;

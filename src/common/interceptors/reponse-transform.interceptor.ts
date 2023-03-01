@@ -7,7 +7,7 @@ import {
 import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { AjaxResult } from '../class/ajax-result.class';
+import { ResponseDto } from '../class/res.class';
 import { KEEP_KEY } from '../contants/decorator.contant';
 
 /**
@@ -28,7 +28,7 @@ export class ReponseTransformInterceptor implements NestInterceptor {
         if (keep) return data;
         const response = context.switchToHttp().getResponse();
         response.header('Content-Type', 'application/json; charset=utf-8');
-        return AjaxResult.success(data);
+        return ResponseDto.success(data);
       }),
     );
   }

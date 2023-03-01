@@ -1,60 +1,46 @@
-import { LoggerService } from '@/shared/logger/logger.service';
+import { ApiException } from 'src/common/exceptions/api.exception';
 import {
-  ExceptionFilter,
-  Catch,
   ArgumentsHost,
+  Catch,
+  ExceptionFilter,
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
-import { AjaxResult } from '../class/ajax-result.class';
-import { ApiException } from '../exceptions/api.exception';
+import { LoggerService } from '@/shared/logger/logger.service';
+import { ResponseDto } from '../class/res.class';
+import { Response } from 'express';
 
-/**
- * 全局错误拦截器
- */
 @Catch()
-export class AllExceptionsFilter implements ExceptionFilter {
+export class ApiExceptionFilter implements ExceptionFilter {
   constructor(private logger: LoggerService) {}
 
-  catch(exception: unknown, host: ArgumentsHost) {
+  catch(exception: any, host?: ArgumentsHost) {
     const ctx = host.switchToHttp();
-    const response = ctx.getResponse();
-    const { status, result } = this.errorResult(exception);
-    response.header('Content-Type', 'application/json; charset=utf-8');
-    response.status(status).json(result);
-  }
+    const response = ctx.getResponse<Response>();
 
-  /* 解析错误类型，获取状态码和返回值 */
-  errorResult(exception: unknown) {
+    // 检查API执行情况
     const status =
       exception instanceof HttpException
         ? exception.getStatus()
-        : HttpStatus.INTERNAL_SERVER_ERROR;
-
+        : HttpStatus.INTERNAL_SERVER_ERROR; // 500
+    // 设置 json 响应
+    response.header('Content-Type', 'application/json;charset=utf-8');
     const code =
       exception instanceof ApiException
-        ? (exception as ApiException).getErrCode()
+        ? (exception as ApiException).getErrorCode()
         : status;
-
-    let message: string;
-    if (exception instanceof HttpException) {
-      const response = exception.getResponse();
-      message = (response as any).message ?? response;
-    } else {
-      message = `${exception}`;
-    }
+    let message = '服务器异常，请稍后再试';
+    message =
+      exception instanceof HttpException ? exception.message : `${exception}`;
     // 记录 500 日志
     if (status >= 500) {
-      this.logger.error(exception, AllExceptionsFilter.name);
+      this.logger.error(exception, ApiExceptionFilter.name);
     }
-    // 401
-    if (status >= 401) {
-      this.logger.warn(exception, AllExceptionsFilter.name);
-    }
-
+    const result = new ResponseDto(code, null, message);
+    response.status(status).send(result);
     return {
+      result,
       status,
-      result: AjaxResult.error(message, code),
     };
   }
 }

@@ -7,8 +7,7 @@ import {
   UseGuards,
   Headers,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
-import { DataObj } from 'src/common/class/data-obj.class';
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   ApiDataResponse,
   typeEnum,
@@ -21,12 +20,16 @@ import { ReqLoginDto } from './dto/req-login.dto';
 import { ResImageCaptchaDto, ResLoginDto } from './dto/res-login.dto';
 import { LoginService } from './login.service';
 import { Request } from 'express';
+import { ImageCaptcha, LoginToken } from './class/login.class';
+
 @ApiTags('登录')
 @Controller()
 export class LoginController {
   constructor(private readonly loginService: LoginService) {}
 
   /* 获取图片验证码 */
+  @ApiOperation({ summary: '获取登陆图片验证码' })
+  @ApiOkResponse({ type: ImageCaptcha })
   @Get('captchaImage')
   @Public()
   async captchaImage(): Promise<ResImageCaptchaDto> {
@@ -34,6 +37,8 @@ export class LoginController {
   }
 
   /* 用户登录 */
+  @ApiOperation({ summary: '用户登陆' })
+  @ApiOkResponse({ type: LoginToken })
   @Post('login')
   @Public()
   @UseGuards(LocalAuthGuard)
@@ -45,20 +50,22 @@ export class LoginController {
   }
 
   /* 获取用户信息 */
+  @ApiOperation({ summary: '获取用户信息' })
   @Get('getInfo')
   async getInfo(@User(UserEnum.userId) userId: number) {
     return await this.loginService.getInfo(userId);
   }
 
   /* 获取用户路由信息 */
+  @ApiOperation({ summary: '获取用户路由信息' })
   @Get('getRouters')
   @ApiDataResponse(typeEnum.objectArr, Router)
   async getRouters(@User(UserEnum.userId) userId: number) {
-    const router = await this.loginService.getRouterByUser(userId);
-    return DataObj.create(router);
+    return await this.loginService.getRouterByUser(userId);
   }
 
   /* 退出登录 */
+  @ApiOperation({ summary: '退出登录' })
   @Public()
   @Post('logout')
   async logout(@Headers('Authorization') authorization: string) {

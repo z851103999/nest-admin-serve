@@ -25,7 +25,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   /* 主动处理错误 */
   handleRequest(err, user, info) {
     if (err || !user) {
-      throw err || new ApiException('登录状态已过期', 401);
+      throw err || new ApiException(11002);
     }
     return user;
   }

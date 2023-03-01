@@ -246,21 +246,21 @@ export class JobService {
   async analysisinvokeTarget(job: Job) {
     const invokeTarget = job.invokeTarget;
     const splitArr = invokeTarget.split('.');
-    if (splitArr.length != 2) throw new ApiException('调用方法格式错误');
+    if (splitArr.length != 2) throw new ApiException(10105);
     const serviceName = splitArr[0];
     if (!(splitArr[1].includes('(') && splitArr[1].includes(')')))
-      throw new ApiException('调用方法格式错误');
+      throw new ApiException(10105);
     const funName = splitArr[1].match(/(\S*)\(/)[1];
-    if (!funName) throw new ApiException('调用方法格式错误');
+    if (!funName) throw new ApiException(10105);
     const argumens = eval('[' + splitArr[1].match(/\((\S*)\)/)[1] + ']');
     let service: any;
     try {
       service = await this.moduleRef.get(serviceName, { strict: false });
       if (!service || !(funName in service)) {
-        throw new ApiException('调用方法未找到');
+        throw new ApiException(10106);
       }
     } catch (error) {
-      throw new ApiException('调用方法未找到');
+      throw new ApiException(10106);
     }
     return {
       serviceName,

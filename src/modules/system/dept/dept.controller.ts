@@ -13,7 +13,6 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { DataObj } from 'src/common/class/data-obj.class';
 import {
   ApiDataResponse,
   typeEnum,
@@ -60,16 +59,14 @@ export class DeptController {
   @RequiresPermissions('system:dept:query')
   @ApiDataResponse(typeEnum.objectArr, ReqAddDeptDto)
   async list(@Query() reqDeptListDto: ReqDeptListDto) {
-    const deptArr = await this.deptService.list(reqDeptListDto);
-    return DataObj.create(deptArr);
+    return await this.deptService.list(reqDeptListDto);
   }
 
   /* 获取部门树结构 */
   @Get('treeselect')
   @ApiDataResponse(typeEnum.objectArr, TreeDataDto)
   async treeselect(@DataScopeSql() dataScopeSql: string) {
-    const deptTree = await this.deptService.treeselectByOrg(dataScopeSql);
-    return DataObj.create(deptTree);
+    return await this.deptService.treeselectByOrg(dataScopeSql);
   }
 
   /* 通过id查询部门 */
@@ -77,16 +74,14 @@ export class DeptController {
   @RequiresPermissions('system:dept:query')
   @ApiDataResponse(typeEnum.object, ReqAddDeptDto)
   async one(@Param('deptId') deptId: number) {
-    const dept = await this.deptService.findRawById(deptId);
-    return DataObj.create(dept);
+    return await this.deptService.findRawById(deptId);
   }
 
   /* 查询除自己(包括子类)外部门列表 */
   @Get('list/exclude/:deptId')
   @ApiDataResponse(typeEnum.objectArr, ReqAddDeptDto)
   async outList(@Param('deptId') deptId: number) {
-    const deptArr = await this.deptService.outList(deptId);
-    return DataObj.create(deptArr);
+    return await this.deptService.outList(deptId);
   }
 
   /* 修改部门 */
@@ -117,8 +112,8 @@ export class DeptController {
     @User(UserEnum.userName, UserInfoPipe) userName: string,
   ) {
     const childs = await this.deptService.findChildsByParentId(deptId);
-    if (childs && childs.length)
-      throw new ApiException('该部门下还存在其他部门，无法删除');
+    // 该部门存在子部门，请先删除子部门
+    if (childs && childs.length) throw new ApiException(10015);
     await this.deptService.delete(deptId, userName);
   }
 

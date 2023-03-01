@@ -13,7 +13,6 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { DataObj } from 'src/common/class/data-obj.class';
 import {
   ApiDataResponse,
   typeEnum,
@@ -53,16 +52,14 @@ export class MenuController {
   @RequiresPermissions('system:menu:query')
   @ApiDataResponse(typeEnum.objectArr, ReqAddMenuDto)
   async list(@Query() reqMenuListDto: ReqMenuListDto) {
-    const menutArr = await this.menuService.list(reqMenuListDto);
-    return DataObj.create(menutArr);
+    return await this.menuService.list(reqMenuListDto);
   }
 
   /* 查询菜单树结构 */
   @Get('treeselect')
   @ApiDataResponse(typeEnum.objectArr, TreeDataDto)
   async treeselect() {
-    const menuTree = await this.menuService.treeselect();
-    return DataObj.create(menuTree);
+    return await this.menuService.treeselect();
   }
 
   /* 通过id查询列表 */
@@ -70,16 +67,14 @@ export class MenuController {
   @RequiresPermissions('system:menu:query')
   @ApiDataResponse(typeEnum.object, ReqAddMenuDto)
   async one(@Param('menuId') menuId: number) {
-    const menu = await this.menuService.findRawById(menuId);
-    return DataObj.create(menu);
+    return await this.menuService.findRawById(menuId);
   }
 
   /* 查询除自己(包括子类)外菜单列表 */
   @Get('list/exclude/:menuId')
   @ApiDataResponse(typeEnum.objectArr, ReqAddMenuDto)
   async outList(@Param('menuId') menuId: number) {
-    const menuArr = await this.menuService.outList(menuId);
-    return DataObj.create(menuArr);
+    return await this.menuService.outList(menuId);
   }
 
   /* 修改菜单 */
@@ -100,7 +95,8 @@ export class MenuController {
   async delete(@Param('menuId') menuId: number) {
     const childs = await this.menuService.findChildsByParentId(menuId);
     if (childs && childs.length)
-      throw new ApiException('该菜单下还存在其他菜单，无法删除');
+      // 该菜单下还存在其他菜单，无法删除
+      throw new ApiException(10108);
     await this.menuService.delete(menuId);
   }
 

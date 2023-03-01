@@ -290,7 +290,7 @@ export class UserService {
     const password = this.sharedService.md5(
       reqUpdateSelfPwd.oldPassword + user.salt,
     );
-    if (password !== user.password) throw new ApiException('旧密码错误');
+    if (password !== user.password) throw new ApiException(10111);
     user.password = this.sharedService.md5(
       reqUpdateSelfPwd.newPassword + user.salt,
     );
@@ -306,9 +306,10 @@ export class UserService {
     for await (const iterator of data) {
       let user = new User();
       if (!iterator.userName || !iterator.password || !iterator.nickName)
-        throw new ApiException('用户账号、用户昵称、用户密码不能为空');
+        // 用户账号，用户昵称，用户密码不能为空
+        throw new ApiException(10112);
       const one = await this.findOneByUsername(iterator.userName);
-      if (one) throw new ApiException('用户账号已存在，请检查');
+      if (one) throw new ApiException(10113);
       iterator.salt = await this.sharedService.generateUUID();
       iterator.password = this.sharedService.md5(
         iterator.password + iterator.salt,

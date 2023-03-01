@@ -180,7 +180,8 @@ export class UserController {
     const user = await this.userService.findOneByUserNameState(
       reqAddUserDto.userName,
     );
-    if (user) throw new ApiException('该用户名已存在，请更换');
+    // 系统用户已存在
+    if (user) throw new ApiException(10001);
     reqAddUserDto.createBy = reqAddUserDto.updateBy = userName;
     await this.userService.addUser(reqAddUserDto);
   }
@@ -204,7 +205,8 @@ export class UserController {
       reqUpdateUserDto.updateBy = userName;
       await this.userService.updateUser(reqUpdateUserDto);
     } else {
-      throw new ApiException('该用户不存在');
+      // 用户不存在
+      throw new ApiException(10017);
     }
   }
 
