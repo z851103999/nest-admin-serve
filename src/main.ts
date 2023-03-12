@@ -11,6 +11,7 @@ import helmet from 'helmet';
 import compression from 'compression';
 import { LoggerService } from './shared/logger/logger.service';
 import { Logger } from '@nestjs/common';
+import { join } from 'node:path';
 
 // webpack
 declare const module: any;
@@ -53,8 +54,15 @@ async function bootstrap() {
     }),
   );
 
-  /* 配置静态资源目录 */
-  app.useStaticAssets({ root: 'public' });
+  // /* 配置静态资源目录 */
+  // app.useStaticAssets(join(__dirname, '../public'));
+  // /* 配置上传文件目录为 资源目录 */
+  // if (process.env.uploadPath) {
+  //   app.useStaticAssets(process.env.uploadPath, {
+  //     prefix: '/upload',
+  //   });
+  // }
+  app.useStaticAssets({ root: join(__dirname, '../public') });
 
   /* 启动swagger */
   setupSwagger(app);
