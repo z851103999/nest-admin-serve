@@ -1,6 +1,6 @@
 import { UploadController } from './upload.controller';
 import { Module } from '@nestjs/common';
-import { MulterModule } from '@nestjs/platform-express';
+import { MulterModule } from '@webundsoehne/nest-fastify-file-upload';
 import * as fs from 'fs';
 import * as multer from 'multer';
 import * as MIMEType from 'whatwg-mimetype';

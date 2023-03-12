@@ -1,6 +1,9 @@
 import { NestFactory } from '@nestjs/core';
-import { NestExpressApplication } from '@nestjs/platform-express';
-import { join } from 'path';
+import {
+  FastifyAdapter,
+  NestFastifyApplication,
+} from '@nestjs/platform-fastify';
+// import { contentParser } from 'fastify-multer'
 import { AppModule } from './app.module';
 import { setupSwagger } from './setup-swagger';
 import history from 'connect-history-api-fallback';
@@ -13,7 +16,12 @@ import { Logger } from '@nestjs/common';
 declare const module: any;
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestFastifyApplication>(
+    AppModule,
+    new FastifyAdapter(),
+  );
+
+  // await app.register(contentParser)
 
   /* 设置 HTTP 标头来帮助保护应用免受一些众所周知的 Web 漏洞的影响 */
   app.use(
@@ -46,13 +54,7 @@ async function bootstrap() {
   );
 
   /* 配置静态资源目录 */
-  app.useStaticAssets(join(__dirname, '../public'));
-  /* 配置上传文件目录为 资源目录 */
-  if (process.env.uploadPath) {
-    app.useStaticAssets(process.env.uploadPath, {
-      prefix: '/upload',
-    });
-  }
+  app.useStaticAssets({ root: 'public' });
 
   /* 启动swagger */
   setupSwagger(app);

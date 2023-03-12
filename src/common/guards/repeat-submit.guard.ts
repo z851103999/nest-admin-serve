@@ -3,7 +3,7 @@ import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { REOEATSUBMIT_METADATA } from '../contants/decorator.contant';
 import { RepeatSubmitOption } from '../decorators/repeat-submit.decorator';
-import { Request } from 'express';
+import { FastifyRequest } from 'fastify';
 import { ApiException } from '../exceptions/api.exception';
 
 /**
@@ -21,7 +21,7 @@ export class RepeatSubmitGuard implements CanActivate {
       context.getHandler(),
     );
     if (!repeatSubmitOption) return true;
-    const request: Request = context.switchToHttp().getRequest();
+    const request = context.switchToHttp().getRequest<FastifyRequest>();
     const cache = await this.redis.get(request.url);
     const data = {
       body: request.body,

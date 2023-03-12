@@ -19,7 +19,6 @@ import { MenuService } from '../system/menu/menu.service';
 import { User } from '../system/user/entities/user.entity';
 import { UserService } from '../system/user/user.service';
 import { ResInfo } from './dto/res-login.dto';
-import { Request } from 'express';
 import { LogService } from '../monitor/log/log.service';
 import { ConfigService } from '@nestjs/config';
 import { Payload } from './login.interface';
@@ -63,8 +62,8 @@ export class LoginService {
   }
 
   /* 登录 */
-  async login(request: Request) {
-    const { user } = request as any;
+  async login(request) {
+    const { user } = request;
     const payload: Payload = { userId: user.userId, pv: 1 };
     //生成token
     let jwtSign = this.jwtService.sign(payload);

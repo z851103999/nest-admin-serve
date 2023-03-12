@@ -10,7 +10,7 @@ import { ReqLogininforDto, ReqOperLogDto } from './dto/req-log.dto';
 import { Logininfor } from './entities/logininfor.entity';
 import { OperLog } from './entities/oper_log.entity';
 import uaParser from 'ua-parser-js';
-import { Request } from 'express';
+import { FastifyRequest } from 'fastify';
 import dayjs from 'dayjs';
 
 @Injectable()
@@ -84,7 +84,13 @@ export class LogService {
   }
 
   /* 新增登录日志 */
-  async addLogininfor(request: Request, msg: string, token?: string) {
+  async addLogininfor(
+    request: FastifyRequest<{
+      Body: { username: string };
+    }>,
+    msg: string,
+    token?: string,
+  ) {
     const logininfor = new Logininfor();
     const { username } = request.body;
     const { browser, os } = uaParser(request.headers['user-agent']); //获取用户电脑信息

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import * as CryptoJS from 'crypto-js';
 import { customAlphabet, nanoid } from 'nanoid';
-import { Request } from 'express';
+import { FastifyRequest } from 'fastify';
 import axios from 'axios';
 import * as iconv from 'iconv-lite';
 
@@ -60,7 +60,7 @@ export class SharedService {
   }
 
   /* 获取请求IP */
-  getReqIP(req: Request): string {
+  getReqIP(req: FastifyRequest): string {
     return (
       // 判断是否有反向代理 IP
       (

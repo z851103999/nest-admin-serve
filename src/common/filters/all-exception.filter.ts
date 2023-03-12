@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { LoggerService } from '@/shared/logger/logger.service';
 import { ResponseDto } from '../class/res.class';
-import { Response } from 'express';
+import { FastifyReply } from 'fastify';
 
 @Catch()
 export class ApiExceptionFilter implements ExceptionFilter {
@@ -16,7 +16,7 @@ export class ApiExceptionFilter implements ExceptionFilter {
 
   catch(exception: any, host?: ArgumentsHost) {
     const ctx = host.switchToHttp();
-    const response = ctx.getResponse<Response>();
+    const response = ctx.getResponse<FastifyReply>();
 
     // 检查API执行情况
     const status =

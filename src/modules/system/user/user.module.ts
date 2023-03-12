@@ -7,7 +7,7 @@ import { RoleModule } from '../role/role.module';
 import { PostModule } from '../post/post.module';
 import { DeptModule } from '../dept/dept.module';
 import { storage } from 'src/modules/common/upload/upload.module';
-import { MulterModule } from '@nestjs/platform-express';
+import { MulterModule } from '@webundsoehne/nest-fastify-file-upload';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({

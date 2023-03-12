@@ -19,7 +19,6 @@ import { Router } from '../system/menu/dto/res-menu.dto';
 import { ReqLoginDto } from './dto/req-login.dto';
 import { ResImageCaptchaDto, ResLoginDto } from './dto/res-login.dto';
 import { LoginService } from './login.service';
-import { Request } from 'express';
 import { ImageCaptcha, LoginToken } from './class/login.class';
 
 @ApiTags('登录')
@@ -44,7 +43,7 @@ export class LoginController {
   @UseGuards(LocalAuthGuard)
   async login(
     @Body() reqLoginDto: ReqLoginDto,
-    @Req() req: Request,
+    @Req() req,
   ): Promise<ResLoginDto> {
     return await this.loginService.login(req);
   }

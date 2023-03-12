@@ -7,6 +7,7 @@ import { ExcelTypeEnum } from './excel.enum';
 import * as fs from 'fs';
 import { ApiException } from 'src/common/exceptions/api.exception';
 import dayjs from 'dayjs';
+import { MulterFile } from '@webundsoehne/nest-fastify-file-upload';
 
 @Injectable()
 export class ExcelService {
@@ -29,10 +30,7 @@ export class ExcelService {
   }
 
   /* 导入 */
-  async import<TModel extends Type<any>>(
-    model: TModel,
-    file: Express.Multer.File,
-  ) {
+  async import<TModel extends Type<any>>(model: TModel, file: MulterFile) {
     try {
       const workSheetsFromBuffer = xlsx.parse(fs.readFileSync(file.path));
       const data = workSheetsFromBuffer[0].data;

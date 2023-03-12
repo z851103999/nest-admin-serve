@@ -43,7 +43,10 @@ import { ApiException } from 'src/common/exceptions/api.exception';
 import { PaginationPipe } from 'src/common/pipes/pagination.pipe';
 import { ExcelService } from 'src/modules/common/excel/excel.service';
 import { Keep } from 'src/common/decorators/keep.decorator';
-import { FileInterceptor } from '@nestjs/platform-express';
+import {
+  FileInterceptor,
+  MulterFile,
+} from '@webundsoehne/nest-fastify-file-upload';
 import { BusinessTypeEnum, Log } from 'src/common/decorators/log.decorator';
 import { DataScope } from 'src/common/decorators/datascope.decorator';
 import { DataScopeSql } from 'src/common/decorators/data-scope-sql.decorator';
@@ -132,7 +135,7 @@ export class UserController {
   @Post('profile/avatar')
   @UseInterceptors(FileInterceptor('avatarfile'))
   async avatar(
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file: MulterFile,
     @Query('fileName') fileName,
     @UserDec(UserEnum.userId) userId: number,
   ) {
@@ -319,7 +322,7 @@ export class UserController {
   @RequiresPermissions('system:user:import')
   @UseInterceptors(FileInterceptor('file'))
   async importData(
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file: MulterFile,
     @UserDec(UserEnum.userName, UserInfoPipe) userName: string,
   ) {
     const data = await this.excelService.import(User, file);

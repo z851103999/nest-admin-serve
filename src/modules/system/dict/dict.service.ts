@@ -94,8 +94,8 @@ export class DictService {
     const errorList = dictTypeList.filter((item) => item.dictDatas.length);
     if (errorList.length) {
       const idArr = errorList.map((item) => item.dictId);
-      // 字典编号为${idArr.join('、')}的字典存在字典值，请先删除字典值
       throw new ApiException(10115);
+      // 字典编号为${idArr.join('、')}的字典存在字典值，请先删除字典值
     } else {
       await this.dictTypeRepository.delete(dictIdArr);
     }
