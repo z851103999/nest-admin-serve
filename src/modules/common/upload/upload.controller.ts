@@ -1,3 +1,7 @@
+/*
+https://docs.nestjs.com/controllers#controllers
+*/
+
 import {
   Controller,
   Post,
@@ -12,7 +16,6 @@ import {
   MulterFile,
 } from '@webundsoehne/nest-fastify-file-upload';
 import { ApiTags } from '@nestjs/swagger';
-
 @ApiTags('文件上传')
 @Controller('common')
 export class UploadController {
@@ -33,7 +36,7 @@ export class UploadController {
   /* 数组文件上传 */
   @Post('uploads')
   @UseInterceptors(FilesInterceptor('files'))
-  async uploadFils(@UploadedFiles() files: Array<MulterFile>) {
+  async uploadFils(@UploadedFiles() files: Array<Express.Multer.File>) {
     /* 暂未处理 */
     return files;
   }

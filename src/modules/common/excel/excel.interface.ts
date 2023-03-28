@@ -8,7 +8,7 @@ export interface ExcelOption {
   // 导出到Excel中的名字
   name: string;
 
-  // 日期格式, momnet文档看规则（http://momentjs.cn/docs/）  如: YYYY-MM-DD 或  YYYY-MM-DD HH:mm:ss
+  // 日期格式, momnet文档看规则（http://dayjsjs.cn/docs/）  如: YYYY-MM-DD 或  YYYY-MM-DD HH:mm:ss
   dateFormat?: string;
 
   // 如果是字典类型，请设置字典的type值 (如: sys_user_sex)

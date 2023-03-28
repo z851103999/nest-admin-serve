@@ -13,6 +13,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { DataObj } from 'src/common/class/data-obj.class';
 import {
   ApiDataResponse,
   typeEnum,
@@ -61,7 +62,8 @@ export class NoticeController {
   @RequiresPermissions('system:notice:query')
   @ApiDataResponse(typeEnum.object, Notice)
   async one(@Param('noticeId') noticeId: number) {
-    return await this.noticeService.findById(noticeId);
+    const notice = await this.noticeService.findById(noticeId);
+    return DataObj.create(notice);
   }
 
   /* 更新公告 */

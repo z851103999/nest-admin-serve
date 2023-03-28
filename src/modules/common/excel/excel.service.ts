@@ -1,13 +1,12 @@
 import { Injectable, Type } from '@nestjs/common';
 import { EXCEL_ARR_KRY } from './excel.constant';
 import xlsx from 'node-xlsx';
+import dayjs from 'dayjs';
 import { DictService } from 'src/modules/system/dict/dict.service';
 import { ExcelOptionAll } from './excel.interface';
 import { ExcelTypeEnum } from './excel.enum';
 import * as fs from 'fs';
 import { ApiException } from 'src/common/exceptions/api.exception';
-import dayjs from 'dayjs';
-import { MulterFile } from '@webundsoehne/nest-fastify-file-upload';
 
 @Injectable()
 export class ExcelService {
@@ -30,7 +29,10 @@ export class ExcelService {
   }
 
   /* 导入 */
-  async import<TModel extends Type<any>>(model: TModel, file: MulterFile) {
+  async import<TModel extends Type<any>>(
+    model: TModel,
+    file: Express.Multer.File,
+  ) {
     try {
       const workSheetsFromBuffer = xlsx.parse(fs.readFileSync(file.path));
       const data = workSheetsFromBuffer[0].data;
@@ -52,7 +54,7 @@ export class ExcelService {
       return result;
     } catch (error) {
       // 文件格式错误
-      throw new ApiException(12001);
+      throw new ApiException(12000, 200);
     }
   }
 

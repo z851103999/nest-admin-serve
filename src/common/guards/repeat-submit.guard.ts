@@ -41,7 +41,7 @@ export class RepeatSubmitGuard implements CanActivate {
       }
     } else {
       if (dataString && cache === dataString) {
-        throw new ApiException(10103);
+        throw new ApiException(10006, 200);
       }
     }
     return true;

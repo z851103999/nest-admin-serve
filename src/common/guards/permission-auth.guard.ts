@@ -38,7 +38,8 @@ export class PermissionAuthGuard implements CanActivate {
         return userPermissionArr.includes(userPermission);
       });
     }
-    if (!result) throw new ApiException(11003);
+    //'无权限，请联系管理员申请权限',
+    if (!result) throw new ApiException(10005, 200);
     return result;
   }
 }

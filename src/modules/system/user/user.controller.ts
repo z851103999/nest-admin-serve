@@ -43,10 +43,7 @@ import { ApiException } from 'src/common/exceptions/api.exception';
 import { PaginationPipe } from 'src/common/pipes/pagination.pipe';
 import { ExcelService } from 'src/modules/common/excel/excel.service';
 import { Keep } from 'src/common/decorators/keep.decorator';
-import {
-  FileInterceptor,
-  MulterFile,
-} from '@webundsoehne/nest-fastify-file-upload';
+import { FileInterceptor } from '@webundsoehne/nest-fastify-file-upload';
 import { BusinessTypeEnum, Log } from 'src/common/decorators/log.decorator';
 import { DataScope } from 'src/common/decorators/datascope.decorator';
 import { DataScopeSql } from 'src/common/decorators/data-scope-sql.decorator';
@@ -135,7 +132,7 @@ export class UserController {
   @Post('profile/avatar')
   @UseInterceptors(FileInterceptor('avatarfile'))
   async avatar(
-    @UploadedFile() file: MulterFile,
+    @UploadedFile() file: Express.Multer.File,
     @Query('fileName') fileName,
     @UserDec(UserEnum.userId) userId: number,
   ) {
@@ -183,8 +180,8 @@ export class UserController {
     const user = await this.userService.findOneByUserNameState(
       reqAddUserDto.userName,
     );
-    // 系统用户已存在
-    if (user) throw new ApiException(10001);
+    // 该用户名已存在，请更换
+    if (user) throw new ApiException(14003, 200);
     reqAddUserDto.createBy = reqAddUserDto.updateBy = userName;
     await this.userService.addUser(reqAddUserDto);
   }
@@ -208,8 +205,8 @@ export class UserController {
       reqUpdateUserDto.updateBy = userName;
       await this.userService.updateUser(reqUpdateUserDto);
     } else {
-      // 用户不存在
-      throw new ApiException(10017);
+      // 该用户不存在
+      throw new ApiException(14002, 200);
     }
   }
 
@@ -322,7 +319,7 @@ export class UserController {
   @RequiresPermissions('system:user:import')
   @UseInterceptors(FileInterceptor('file'))
   async importData(
-    @UploadedFile() file: MulterFile,
+    @UploadedFile() file: Express.Multer.File,
     @UserDec(UserEnum.userName, UserInfoPipe) userName: string,
   ) {
     const data = await this.excelService.import(User, file);

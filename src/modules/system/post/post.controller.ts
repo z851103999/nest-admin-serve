@@ -26,6 +26,7 @@ import {
   ApiDataResponse,
   typeEnum,
 } from 'src/common/decorators/api-data-response.decorator';
+import { DataObj } from 'src/common/class/data-obj.class';
 import { Keep } from 'src/common/decorators/keep.decorator';
 import { ExcelService } from 'src/modules/common/excel/excel.service';
 import { BusinessTypeEnum, Log } from 'src/common/decorators/log.decorator';
@@ -54,7 +55,7 @@ export class PostController {
   ) {
     const post = await this.postService.findByPostCode(reqAddPostDto.postCode);
     // 岗位编码已存在，请更换
-    if (post) throw new ApiException(10109);
+    if (post) throw new ApiException(17000, 200);
     reqAddPostDto.createBy = reqAddPostDto.updateBy = userName;
     await this.postService.addOrUpdate(reqAddPostDto);
   }
@@ -72,7 +73,8 @@ export class PostController {
   @RequiresPermissions('system:post:query')
   @ApiDataResponse(typeEnum.object, SysPost)
   async one(@Param('postId') postId: number) {
-    return await this.postService.findById(postId);
+    const post = await this.postService.findById(postId);
+    return DataObj.create(post);
   }
 
   /* 修改岗位 */

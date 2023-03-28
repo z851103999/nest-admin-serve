@@ -1,6 +1,11 @@
+/*
+https://docs.nestjs.com/providers#services
+*/
+
 import { InjectRedis, Redis } from '@nestjs-modules/ioredis';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import dayjs from 'dayjs';
 import { USER_ONLINE_KEY } from 'src/common/contants/redis.contant';
 import { PaginatedDto } from 'src/common/dto/paginated.dto';
 import { User } from 'src/modules/system/user/entities/user.entity';
@@ -10,8 +15,7 @@ import { ReqLogininforDto, ReqOperLogDto } from './dto/req-log.dto';
 import { Logininfor } from './entities/logininfor.entity';
 import { OperLog } from './entities/oper_log.entity';
 import uaParser from 'ua-parser-js';
-import { FastifyRequest } from 'fastify';
-import dayjs from 'dayjs';
+import { Request } from 'express';
 
 @Injectable()
 export class LogService {
@@ -84,13 +88,7 @@ export class LogService {
   }
 
   /* 新增登录日志 */
-  async addLogininfor(
-    request: FastifyRequest<{
-      Body: { username: string };
-    }>,
-    msg: string,
-    token?: string,
-  ) {
+  async addLogininfor(request: Request, msg: string, token?: string) {
     const logininfor = new Logininfor();
     const { username } = request.body;
     const { browser, os } = uaParser(request.headers['user-agent']); //获取用户电脑信息

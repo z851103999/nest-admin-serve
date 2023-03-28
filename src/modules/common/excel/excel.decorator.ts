@@ -5,6 +5,7 @@ import { ExcelTypeEnum } from './excel.enum';
 /* 
   getMetadata 方法，如果当前类型的元数据不存在，将会对其父类型上的元数据进行查找。
   getOwnMetadata 方法， 只会对当前类型上的元数据进行查找。
+
   列如下面的的操作 ，凡是继承了 BaseEntity类的， 如果该类上的 元数据不存在，将会对 BaseEntity类上的元数据 进行查找。
 */
 export const Excel = (option: ExcelOption): PropertyDecorator => {

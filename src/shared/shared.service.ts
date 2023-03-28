@@ -60,7 +60,7 @@ export class SharedService {
   }
 
   /* 获取请求IP */
-  getReqIP(req: FastifyRequest): string {
+  getReqIP(req): string {
     return (
       // 判断是否有反向代理 IP
       (

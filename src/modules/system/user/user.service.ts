@@ -1,6 +1,17 @@
+/*
+ * @Author: Sheng.Jiang
+ * @Date: 2021-12-09 14:49:35
+ * @LastEditTime: 2022-11-08 11:25:38
+ * @LastEditors: Please set LastEditors
+ * @Description: 用户管理 service
+ * @FilePath: \meimei-admin\src\modules\system\user\user.service.ts
+ * You can you up，no can no bb！！
+ */
+
 import { InjectRedis, Redis } from '@nestjs-modules/ioredis';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import dayjs from 'dayjs';
 import { USER_VERSION_KEY } from 'src/common/contants/redis.contant';
 import { PaginatedDto } from 'src/common/dto/paginated.dto';
 import { ApiException } from 'src/common/exceptions/api.exception';
@@ -19,7 +30,6 @@ import {
 } from './dto/req-user.dto';
 import { ResAuthRoleDto, ResHasRoleDto } from './dto/res-user.dto';
 import { User } from './entities/user.entity';
-import dayjs from 'dayjs';
 
 @Injectable()
 export class UserService {
@@ -290,7 +300,7 @@ export class UserService {
     const password = this.sharedService.md5(
       reqUpdateSelfPwd.oldPassword + user.salt,
     );
-    if (password !== user.password) throw new ApiException(10111);
+    if (password !== user.password) throw new ApiException(14001, 200);
     user.password = this.sharedService.md5(
       reqUpdateSelfPwd.newPassword + user.salt,
     );
@@ -306,10 +316,10 @@ export class UserService {
     for await (const iterator of data) {
       let user = new User();
       if (!iterator.userName || !iterator.password || !iterator.nickName)
-        // 用户账号，用户昵称，用户密码不能为空
-        throw new ApiException(10112);
+        // 用户账号、用户昵称、用户密码不能为空
+        throw new ApiException(15000, 200);
       const one = await this.findOneByUsername(iterator.userName);
-      if (one) throw new ApiException(10113);
+      if (one) throw new ApiException(15001, 200);
       iterator.salt = await this.sharedService.generateUUID();
       iterator.password = this.sharedService.md5(
         iterator.password + iterator.salt,

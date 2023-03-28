@@ -1,3 +1,7 @@
+/*
+https://docs.nestjs.com/controllers#controllers
+*/
+
 import {
   Body,
   Controller,
@@ -10,6 +14,7 @@ import {
   StreamableFile,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { DataObj } from 'src/common/class/data-obj.class';
 import {
   ApiDataResponse,
   typeEnum,
@@ -66,7 +71,8 @@ export class JobController {
   @RequiresPermissions('monitor:job:query')
   @ApiDataResponse(typeEnum.object, Job)
   async oneJob(@Param('jobId') jobId: number) {
-    return await this.jobService.oneJob(jobId);
+    const job = await this.jobService.oneJob(jobId);
+    return DataObj.create(job);
   }
 
   /* 编辑任务 */

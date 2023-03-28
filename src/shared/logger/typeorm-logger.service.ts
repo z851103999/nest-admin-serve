@@ -34,7 +34,7 @@ export class TypeORMLoggerService implements Logger {
   }
 
   /**
-   * Logs query and parameters used in it.
+   * 记录查询和其中使用的参数。
    */
   logQuery(query: string, parameters?: any[]) {
     if (
@@ -52,7 +52,7 @@ export class TypeORMLoggerService implements Logger {
   }
 
   /**
-   * Logs query that is failed.
+   * 记录失败的查询。
    */
   logQueryError(error: string | Error, query: string, parameters?: any[]) {
     if (
@@ -70,7 +70,7 @@ export class TypeORMLoggerService implements Logger {
   }
 
   /**
-   * Logs query that is slow.
+   * 记录查询速度较慢
    */
   logQuerySlow(time: number, query: string, parameters?: any[]) {
     const sql =
@@ -82,7 +82,7 @@ export class TypeORMLoggerService implements Logger {
   }
 
   /**
-   * Logs events from the schema build process.
+   * 记录架构生成过程中的事件。
    */
   logSchemaBuild(message: string) {
     if (
@@ -94,15 +94,15 @@ export class TypeORMLoggerService implements Logger {
   }
 
   /**
-   * Logs events from the migrations run process.
+   * 记录迁移运行过程中的事件。
    */
   logMigration(message: string) {
     this.logger.verbose(message);
   }
 
   /**
-   * Perform logging using given logger, or by default to the console.
-   * Log has its own level and message.
+   * 使用给定的记录器执行日志记录，
+   * 或默认在控制台上执行日志记录。日志有自己的级别和消息。
    */
   log(level: 'log' | 'info' | 'warn', message: any) {
     switch (level) {
@@ -131,8 +131,7 @@ export class TypeORMLoggerService implements Logger {
   }
 
   /**
-   * Converts parameters to a string.
-   * Sometimes parameters can have circular objects and therefor we are handle this case too.
+   * 将参数转换为字符串。有时参数可以有原型对象，因此我们也处理这种情况。
    */
   protected stringifyParams(parameters: any[]) {
     try {

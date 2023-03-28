@@ -14,7 +14,7 @@ export enum typeEnum {
   'booleanArr' = 'booleanArr',
   'objectArr' = 'objectArr',
 }
-
+// API 数据响应
 export const ApiDataResponse = <TModel extends Type<any>>(
   type: typeEnum,
   model?: TModel,

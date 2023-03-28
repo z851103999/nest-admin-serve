@@ -5,13 +5,13 @@ https://docs.nestjs.com/providers#services
 import { InjectRedis, Redis } from '@nestjs-modules/ioredis';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import dayjs from 'dayjs';
 import { PaginatedDto } from 'src/common/dto/paginated.dto';
 import { ApiException } from 'src/common/exceptions/api.exception';
 import { Between, FindOptionsWhere, Like, Not, Repository } from 'typeorm';
 import { ReqAddConfigDto, ReqConfigListDto } from './dto/req-sys-config.dto';
 import { SysConfig } from './entities/sys-config.entity';
 import { SYSCONFIG_KEY } from './sys-config.contant';
-import dayjs from 'dayjs';
 
 @Injectable()
 export class SysConfigService {
@@ -27,7 +27,7 @@ export class SysConfigService {
       reqAddConfigDto.configKey,
       (reqAddConfigDto as SysConfig).configId,
     );
-    if (sysConfig) throw new ApiException(10110);
+    if (sysConfig) throw new ApiException(15000, 200);
     return await this.sysConfigRepository.save(reqAddConfigDto);
   }
 

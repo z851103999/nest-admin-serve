@@ -1,3 +1,13 @@
+/*
+ * @Author: Sheng.Jiang
+ * @Date: 2021-12-08 18:29:45
+ * @LastEditTime: 2022-09-13 23:38:51
+ * @LastEditors: Please set LastEditors
+ * @Description: 登录模块
+ * @FilePath: /meimei-admin/src/modules/login/login.module.ts
+ * You can you up，no can no bb！！
+ */
+
 import { Module } from '@nestjs/common';
 import { LoginService } from './login.service';
 import { LoginController } from './login.controller';

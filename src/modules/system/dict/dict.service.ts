@@ -5,6 +5,7 @@ https://docs.nestjs.com/providers#services
 import { InjectRedis, Redis } from '@nestjs-modules/ioredis';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import dayjs from 'dayjs';
 import { PaginatedDto } from 'src/common/dto/paginated.dto';
 import { ApiException } from 'src/common/exceptions/api.exception';
 import { Between, FindOptionsWhere, In, Like, Not, Repository } from 'typeorm';
@@ -18,7 +19,6 @@ import {
 } from './dto/req-dict.dto';
 import { DictData } from './entities/dict_data.entity';
 import { DictType } from './entities/dict_type.entity';
-import dayjs from 'dayjs';
 
 @Injectable()
 export class DictService {
@@ -36,7 +36,7 @@ export class DictService {
       (reqAddDictTypeDto as DictType).dictId,
     );
     // 该字典类型已存在，请更换
-    if (dictType) throw new ApiException(10114);
+    if (dictType) throw new ApiException(16000, 200);
     await this.dictTypeRepository.save(reqAddDictTypeDto);
   }
 
@@ -94,8 +94,8 @@ export class DictService {
     const errorList = dictTypeList.filter((item) => item.dictDatas.length);
     if (errorList.length) {
       const idArr = errorList.map((item) => item.dictId);
-      throw new ApiException(10115);
-      // 字典编号为${idArr.join('、')}的字典存在字典值，请先删除字典值
+      // 字典编号为的字典存在字典值，请先删除字典值
+      throw new ApiException(16001, 200);
     } else {
       await this.dictTypeRepository.delete(dictIdArr);
     }
@@ -178,8 +178,7 @@ export class DictService {
       reqAddDictDataDto.dictValue,
       (reqAddDictDataDto as any).dictCode,
     );
-    // 改字典类型已存在，请更换
-    if (oneDictData) throw new ApiException(10114);
+    if (oneDictData) throw new ApiException(16002, 200);
     const dictType = await this.findByDictType(reqAddDictDataDto.dictType);
     const dictData = Object.assign(
       new DictData(),

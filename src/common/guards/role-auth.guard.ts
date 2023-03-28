@@ -38,7 +38,7 @@ export class RoleAuthGuard implements CanActivate {
         return userRoleArr.includes(userPermission);
       });
     }
-    if (!result) throw new ApiException(11003);
+    if (!result) throw new ApiException(10005, 401);
     return result;
   }
 }

@@ -14,6 +14,7 @@ import {
   StreamableFile,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { DataObj } from 'src/common/class/data-obj.class';
 import {
   ApiDataResponse,
   typeEnum,
@@ -77,7 +78,10 @@ export class SysConfigController {
   @Get('/configKey/:configKey')
   @ApiDataResponse(typeEnum.string, SysConfig)
   async oneByconfigKey(@Param('configKey') configKey: string) {
-    return await this.sysConfigService.lazyFindByConfigKey(configKey);
+    const sysConfig = await this.sysConfigService.lazyFindByConfigKey(
+      configKey,
+    );
+    return DataObj.create(sysConfig);
   }
 
   /* 通过id查询参数 */
@@ -85,7 +89,8 @@ export class SysConfigController {
   @RequiresPermissions('system:config:query')
   @ApiDataResponse(typeEnum.object, SysConfig)
   async one(@Param('configId') configId: number) {
-    return await this.sysConfigService.findById(configId);
+    const sysConfig = await this.sysConfigService.findById(configId);
+    return DataObj.create(sysConfig);
   }
 
   /* 修改参数 */

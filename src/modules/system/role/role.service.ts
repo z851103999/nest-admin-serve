@@ -4,6 +4,7 @@ https://docs.nestjs.com/providers#services
 
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import dayjs from 'dayjs';
 import { PaginatedDto } from 'src/common/dto/paginated.dto';
 import { Between, FindOptionsWhere, In, Like, Repository } from 'typeorm';
 import { DeptService } from '../dept/dept.service';
@@ -17,7 +18,6 @@ import {
   ReqRoleListDto,
 } from './dto/req-role.dto';
 import { Role } from './entities/role.entity';
-import dayjs from 'dayjs';
 
 @Injectable()
 export class RoleService {

@@ -2,11 +2,11 @@ import { UploadController } from './upload.controller';
 import { Module } from '@nestjs/common';
 import { MulterModule } from '@webundsoehne/nest-fastify-file-upload';
 import * as fs from 'fs';
+import dayjs from 'dayjs';
 import * as multer from 'multer';
-import * as MIMEType from 'whatwg-mimetype';
+import MIMEType from 'whatwg-mimetype';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { join } from 'path';
-import dayjs from 'dayjs';
 
 export function storage(uploadPath) {
   return multer.diskStorage({
@@ -37,7 +37,7 @@ export function storage(uploadPath) {
       let originalname = file.originalname;
       //如果文件没有后缀就获取文件后缀进行拼接
       if (file.originalname.lastIndexOf('.') < 0) {
-        // 获取文件后缀
+        //获取文件后缀
         const mimeType = new MIMEType(file.mimetype);
         const subtype = mimeType.subtype;
         originalname = file.originalname + '.' + subtype;

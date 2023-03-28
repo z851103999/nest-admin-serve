@@ -1,8 +1,13 @@
+/*
+https://docs.nestjs.com/providers#services
+*/
+
 import { InjectQueue } from '@nestjs/bull';
 import { Injectable } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CronRepeatOptions, Queue } from 'bull';
+import dayjs from 'dayjs';
 import { JOB_BULL_KEY } from 'src/common/contants/bull.contants';
 import { PaginatedDto } from 'src/common/dto/paginated.dto';
 import { ApiException } from 'src/common/exceptions/api.exception';
@@ -15,7 +20,6 @@ import {
 } from './dto/req-job.dto';
 import { Job } from './entities/job.entity';
 import { JobLog } from './entities/job_log.entity';
-import dayjs from 'dayjs';
 
 @Injectable()
 export class JobService {
@@ -246,21 +250,25 @@ export class JobService {
   async analysisinvokeTarget(job: Job) {
     const invokeTarget = job.invokeTarget;
     const splitArr = invokeTarget.split('.');
-    if (splitArr.length != 2) throw new ApiException(10105);
+    //'调用方法格式错误'
+    if (splitArr.length != 2) throw new ApiException(13000, 200);
     const serviceName = splitArr[0];
     if (!(splitArr[1].includes('(') && splitArr[1].includes(')')))
-      throw new ApiException(10105);
+      // '调用方法格式错误'
+      throw new ApiException(13000, 200);
     const funName = splitArr[1].match(/(\S*)\(/)[1];
-    if (!funName) throw new ApiException(10105);
+    // '调用方法格式错误'
+    if (!funName) throw new ApiException(13000, 200);
     const argumens = eval('[' + splitArr[1].match(/\((\S*)\)/)[1] + ']');
     let service: any;
     try {
       service = await this.moduleRef.get(serviceName, { strict: false });
       if (!service || !(funName in service)) {
-        throw new ApiException(10106);
+        // 调用方法未找到
+        throw new ApiException(13001, 200);
       }
     } catch (error) {
-      throw new ApiException(10106);
+      throw new ApiException(13001, 200);
     }
     return {
       serviceName,

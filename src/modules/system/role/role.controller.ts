@@ -14,6 +14,7 @@ import {
   StreamableFile,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { DataObj } from 'src/common/class/data-obj.class';
 import {
   ApiDataResponse,
   typeEnum,
@@ -78,7 +79,8 @@ export class RoleController {
   @RequiresPermissions('system:role:query')
   @ApiDataResponse(typeEnum.object, Role)
   async one(@Param('roleId') roleId: number) {
-    return await this.roleService.findById(roleId);
+    const role = await this.roleService.findById(roleId);
+    return DataObj.create(role);
   }
 
   /* 编辑角色 */

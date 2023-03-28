@@ -131,8 +131,8 @@ export class LoggerService implements NestLoggerService {
   }
 
   /**
-   * Write a 'info' level log, if the configured level allows for it.
-   * Prints to `stdout` with newline.
+   * 如果配置的级别允许，请编写“信息”级别日志。
+   * 打印到带有换行符的“标准输出”
    */
   log(message: any, context?: string): void;
   log(message: any, ...optionalParams: [...any, string?]): void;
@@ -153,8 +153,8 @@ export class LoggerService implements NestLoggerService {
   }
 
   /**
-   * Write an 'error' level log, if the configured level allows for it.
-   * Prints to `stderr` with newline.
+   * 编写“错误”级别日志（如果配置的级别允许）。
+   * 打印到带有换行符的“stderr”。
    */
   error(message: any, context?: string): void;
   error(message: any, stack?: string, context?: string): void;
@@ -175,8 +175,8 @@ export class LoggerService implements NestLoggerService {
   }
 
   /**
-   * Write a 'warn' level log, if the configured level allows for it.
-   * Prints to `stdout` with newline.
+   * 编写“警告”级别日志（如果配置的级别允许）。
+   * 打印到带有换行符的“标准输出”。
    */
   warn(message: any, context?: string): void;
   warn(message: any, ...optionalParams: [...any, string?]): void;
@@ -197,8 +197,8 @@ export class LoggerService implements NestLoggerService {
   }
 
   /**
-   * Write a 'debug' level log, if the configured level allows for it.
-   * Prints to `stdout` with newline.
+   * 编写“调试”级别日志（如果配置的级别允许）。
+   * 打印到带有换行符的“标准输出”
    */
   debug(message: any, context?: string): void;
   debug(message: any, ...optionalParams: [...any, string?]): void;
@@ -219,8 +219,8 @@ export class LoggerService implements NestLoggerService {
   }
 
   /**
-   * Write a 'verbose' level log, if the configured level allows for it.
-   * Prints to `stdout` with newline.
+   * 如果配置的级别允许，请编写“详细”级别日志。
+   * 打印到带有换行符的“标准输出”。
    */
   verbose(message: any, context?: string): void;
   verbose(message: any, ...optionalParams: [...any, string?]): void;
@@ -260,6 +260,7 @@ export class LoggerService implements NestLoggerService {
   }
 
   // code from -> https://github.com/nestjs/nest/blob/master/packages/common/services/console-logger.service.ts
+  // 获取时间戳
   protected getTimestamp(): string {
     const localeStringOptions = {
       year: 'numeric',
@@ -274,7 +275,7 @@ export class LoggerService implements NestLoggerService {
       localeStringOptions as Intl.DateTimeFormatOptions,
     );
   }
-
+  // 记录消息
   protected recordMessages(
     messages: unknown[],
     context = '',
@@ -299,7 +300,7 @@ export class LoggerService implements NestLoggerService {
       });
     });
   }
-
+  // 打印消息
   protected printMessages(
     messages: unknown[],
     context = '',
@@ -326,14 +327,14 @@ export class LoggerService implements NestLoggerService {
       process[writeStreamType ?? 'stdout'].write(computedMessage);
     });
   }
-
+  // 打印堆栈跟踪
   protected printStackTrace(stack: string) {
     if (!stack) {
       return;
     }
     process.stderr.write(`${stack}\n`);
   }
-
+  // 更新并获取时间戳差异
   private updateAndGetTimestampDiff(): string {
     const includeTimestamp =
       LoggerService.lastTimestampAt && this.options?.timestamp;
@@ -343,7 +344,7 @@ export class LoggerService implements NestLoggerService {
     LoggerService.lastTimestampAt = Date.now();
     return result;
   }
-
+  // 获取要打印的上下文和消息
   private getContextAndMessagesToPrint(args: unknown[]) {
     if (args?.length <= 1) {
       return { messages: args, context: this.context };
@@ -358,7 +359,7 @@ export class LoggerService implements NestLoggerService {
       messages: args.slice(0, args.length - 1),
     };
   }
-
+  // 获取要打印的上下文、堆栈和消息
   private getContextAndStackAndMessagesToPrint(args: unknown[]) {
     const { messages, context } = this.getContextAndMessagesToPrint(args);
     if (messages?.length <= 1) {
@@ -375,7 +376,7 @@ export class LoggerService implements NestLoggerService {
       context,
     };
   }
-
+  // 按日志级别获取颜色
   private getColorByLogLevel(level: WinstonLogLevel): (text: string) => string {
     switch (level) {
       case 'debug':

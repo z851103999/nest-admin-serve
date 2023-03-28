@@ -4,7 +4,6 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { AuthService } from '../auth.service';
 import { jwtConstants } from '../auth.constants';
 import { Payload } from 'src/modules/login/login.interface';
-import { FastifyRequest } from 'fastify';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -17,7 +16,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(request: FastifyRequest, payload: Payload) {
+  async validate(request: Request, payload: Payload) {
     const { userId, pv } = payload;
     const token = (request.headers as any).authorization.slice(7);
     await this.authService.validateToken(userId, pv, token);

@@ -1,5 +1,5 @@
 import { ErrorCodeMap } from './../contants/error-code.contants';
-import { HttpException } from '@nestjs/common';
+import { HttpException, HttpStatus } from '@nestjs/common';
 import { ErrorCodeMapType } from '../contants/error-code.contants';
 
 /**
@@ -11,9 +11,11 @@ export class ApiException extends HttpException {
    */
   private errorCode: ErrorCodeMapType;
 
-  constructor(errorCode: ErrorCodeMapType) {
-    super(ErrorCodeMap[errorCode], 200);
-    this.errorCode = errorCode;
+  constructor(msg: ErrorCodeMapType, status?: HttpStatus) {
+    // super(ErrorCodeMap[errorCode], status)
+    // this.errorCode = errorCode;
+    super(ErrorCodeMap[msg], status);
+    this.errorCode = msg;
   }
 
   getErrorCode(): ErrorCodeMapType {

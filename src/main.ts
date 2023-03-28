@@ -7,7 +7,7 @@ import {
 import { AppModule } from './app.module';
 import { setupSwagger } from './setup-swagger';
 import history from 'connect-history-api-fallback';
-import helmet from 'helmet';
+import helmet from '@fastify/helmet';
 import compression from 'compression';
 import { LoggerService } from './shared/logger/logger.service';
 import { Logger } from '@nestjs/common';
@@ -25,11 +25,17 @@ async function bootstrap() {
   // await app.register(contentParser)
 
   /* 设置 HTTP 标头来帮助保护应用免受一些众所周知的 Web 漏洞的影响 */
-  app.use(
-    helmet({
-      contentSecurityPolicy: false, //取消https强制转换
-    }),
-  );
+  // 在使用fastifyand的时候， CSPhelmet可能会出现问题
+  await app.register(helmet, {
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: [`'self'`],
+        styleSrc: [`'self'`, `'unsafe-inline'`],
+        imgSrc: [`'self'`, 'data:', 'validator.swagger.io'],
+        scriptSrc: [`'self'`, `https: 'unsafe-inline'`],
+      },
+    },
+  });
 
   // winston
   app.useLogger(app.get(LoggerService));
